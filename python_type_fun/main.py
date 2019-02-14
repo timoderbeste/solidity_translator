@@ -1,4 +1,5 @@
 from templates import *
+from sample_generator import generate_contract
 
 def main():
     d1 = Multiply(Number(10), Number(20))
@@ -38,7 +39,7 @@ def main():
     print(dv2.convert_to_solidity())
     print('\n')
 
-    fn = DefineFunction(None, 'foo', [], [Variable('a'), Variable('b')], [DefineVariable('function', 'c', ['uint'], Multiply(Variable('a'), Variable('b')))])
+    fn = DefineFunction(None, 'foo', [], [DefineVariable(None, 'a', ['uint'], None), DefineVariable(None, 'b', ['uint'], None)], [DefineVariable('function', 'c', ['uint'], Multiply(Variable('a'), Variable('b')))])
     print(fn.convert_to_text())
     print(fn.convert_to_solidity())
     print('\n')
@@ -77,4 +78,20 @@ def main():
     print('\n')
 
 if __name__ == '__main__':
-    main()
+    potential_names = {
+        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q'
+    }
+    potential_names = list(potential_names)
+    contracts = []
+    while len(contracts) < 10:
+        try:
+            contract = generate_contract(potential_names)
+            print(contract.convert_to_text())
+            print(contract.convert_to_solidity())
+            contracts.append(contract)
+
+        except RecursionError:
+            pass
+
+    print('contracts now has a length of ', len(contracts))
+    # main()

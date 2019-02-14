@@ -93,7 +93,6 @@ class Add(NumberOperation):
         return '(' + self.expression1.convert_to_solidity() + ' + ' + self.expression2.convert_to_solidity() + ')'
 
 
-
 class Divide(NumberOperation):
     def __init__(self, divident: Expression, divider: Expression):
         NumberOperation.__init__(self)

@@ -23,7 +23,7 @@ class Require(Template):
         return 'require(' + self.boe.convert_to_solidity() + ');'
 
 class DefineEnum(Template):
-    def __init__(self, context, name, elems):
+    def __init__(self, context, name: str, elems: [str]):
         Template.__init__(self)
         self.context = context
         self.name = name
@@ -32,7 +32,7 @@ class DefineEnum(Template):
     def convert_to_text(self):
         elems_str = ''
         for elem in self.elems:
-            elems_str += str(elem)
+            elems_str += str(elem) + ', '
         return (('This ' + self.context) if self.context is not None else 'It') + ' has an enum called ' + self.name + ' that has ' + elems_str
 
     def convert_to_solidity(self):
@@ -81,7 +81,7 @@ class DefineVariable(Template):
                                            + self.value.convert_to_solidity() + ';'))
 
 class DefineFunction(Template):
-    def __init__(self, context: str, name: str, options: [str], params: [Expression], components: [Template]):
+    def __init__(self, context: str, name: str, options: [str], params: [DefineVariable], components: [Template]):
         Template.__init__(self)
         self.context = context
         self.name = name
@@ -121,7 +121,7 @@ class DefineFunction(Template):
         params_code = ''
         if self.params is not None:
             for i, param in enumerate(self.params):
-                params_code += param.convert_to_solidity()
+                params_code += param.convert_to_solidity().replace(';', '')
                 if i < len(self.params) - 1:
                     params_code += ', '
 
