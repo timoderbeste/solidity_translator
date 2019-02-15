@@ -28,7 +28,7 @@ class Variable(Expression):
 
 class Number(Expression):
     def __init__(self, number):
-        Expression.__init__(self)
+        super(Expression).__init__()
         self.number = number
 
     def convert_to_text(self):

@@ -65,7 +65,10 @@ class DefineVariable(Template):
         elif self.options is not None and self.value is not None:
             return (('This ' + self.context) if self.context is not None else 'It') + ' has a ' + options_str + 'variable called ' + self.name + ' with an assigned value ' + self.value.convert_to_text()
         elif self.options is None:
-            return 'The variable ' + self.name + ' is assigned a value ' + self.value.convert_to_text()
+            if self.value:
+                return 'The variable ' + self.name + ' is assigned a value ' + self.value.convert_to_text()
+            else:
+                return (('This ' + self.context) if self.context is not None else 'It') + ' has a ' + 'variable called ' + self.name
         elif self.value is None:
             return (('This ' + self.context) if self.context is not None else 'It') + ' has a ' + options_str + 'variable called ' + self.name
 

@@ -78,19 +78,19 @@ def main():
     print('\n')
 
 if __name__ == '__main__':
-    potential_names = {
-        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q'
-    }
+    potential_names = 'a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split()
+
     potential_names = list(potential_names)
     contracts = []
-    while len(contracts) < 10:
+    while len(contracts) < 50:
         try:
-            contract = generate_contract(potential_names)
+            used_names = []
+            contract = generate_contract(potential_names, used_names)
             print(contract.convert_to_text())
             print(contract.convert_to_solidity())
             contracts.append(contract)
 
-        except RecursionError:
+        except (RecursionError, ValueError):
             pass
 
     print('contracts now has a length of ', len(contracts))
