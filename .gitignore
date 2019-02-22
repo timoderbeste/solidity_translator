@@ -106,3 +106,6 @@ venv.bak/
 # artifacts
 *.swp
 .DS_Store
+
+# others
+python_type_fun/.idea/workspace.xml
