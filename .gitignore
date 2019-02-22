@@ -108,4 +108,4 @@ venv.bak/
 .DS_Store
 
 # others
-python_type_fun/.idea/workspace.xml
+solidity_translator/.idea/*
