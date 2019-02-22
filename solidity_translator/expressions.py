@@ -1,3 +1,5 @@
+from utils import *
+
 class Expression:
     def __init__(self):
         pass
@@ -8,8 +10,26 @@ class Expression:
     def convert_to_solidity(self):
         pass
 
-    #  def eval(self):
-        #  pass
+    @staticmethod
+    def parse_expression_from_text(text):
+        if is_number(text):
+            return Number.parse_expression_from_text(text)
+        elif is_boolean(text):
+            return Boolean.parse_expression_from_text(text)
+        elif text.startswith('[the product of'):
+            return Multiply.parse_expression_from_text(text)
+        elif text.startswith('[the addition of'):
+            return Add.parse_expression_from_text(text)
+        elif text.startswith('[the division of'):
+            return Divide.parse_expression_from_text(text)
+        elif text.startswith('[the equal relationship of'):
+            return Equal.parse_expression_from_text(text)
+        elif text.startswith('[the larger or equal relationship of'):
+            return LargerEqual.parse_expression_from_text(text)
+        elif text.startswith('[the larger relationship of'):
+            return Larger.parse_expression_from_text(text)
+        else:
+            return Variable(text)
 
 
 class Variable(Expression):
@@ -18,13 +38,15 @@ class Variable(Expression):
         self.var_name = var_name
 
     def convert_to_text(self):
-        return self.var_name
+        return '[' + self.var_name + ']'
 
     def convert_to_solidity(self):
         return self.var_name
 
-    #  def eval(self):
-        #  return self.var_name
+    @staticmethod
+    def parse_expression_from_text(text):
+        return Variable(text[1:-1])
+
 
 class Number(Expression):
     def __init__(self, number):
@@ -32,13 +54,15 @@ class Number(Expression):
         self.number = number
 
     def convert_to_text(self):
-        return str(self.number)
+        return '[' + str(self.number) + ']'
 
     def convert_to_solidity(self):
         return str(self.number)
 
-    #  def eval(self):
-        #  return 
+    @staticmethod
+    def parse_expression_from_text(text):
+        return Number(text[1:-1])
+
 
 class Boolean(Expression):
     def __init__(self, boolean):
@@ -47,15 +71,20 @@ class Boolean(Expression):
 
     def convert_to_text(self):
         if self.boolean:
-            return "true"
+            return "[true]"
         else:
-            return "false"
+            return "[false]"
 
     def convert_to_solidity(self):
         if self.boolean:
             return "true"
         else:
             return "false"
+
+    @staticmethod
+    def parse_expression_from_text(text):
+        return Boolean(True) if text == '[true]' else Boolean(False)
+
 
 class NumberOperation(Expression):
     def __init__(self):
@@ -67,6 +96,11 @@ class NumberOperation(Expression):
     def convert_to_solidity(self):
         pass
 
+    @staticmethod
+    def parse_expression_from_text(text):
+        pass
+
+
 class Multiply(NumberOperation):
     def __init__(self, expression1: Expression, expression2: Expression):
         NumberOperation.__init__(self)
@@ -74,10 +108,17 @@ class Multiply(NumberOperation):
         self.expression2 = expression2
 
     def convert_to_text(self):
-        return 'the product of ' + self.expression1.convert_to_text() + ' and ' + self.expression2.convert_to_text()
+        return '[the product of ' + self.expression1.convert_to_text() + ' and ' + self.expression2.convert_to_text() + ']'
 
     def convert_to_solidity(self):
         return '(' + self.expression1.convert_to_solidity() + ' * ' + self.expression2.convert_to_solidity() + ')'
+
+    @staticmethod
+    def parse_expression_from_text(text):
+        left_part = find_left_part(text)
+        right_part = find_right_part(text)
+
+        return Multiply(Expression.parse_expression_from_text(left_part), Expression.parse_expression_from_text(right_part))
 
 
 class Add(NumberOperation):
@@ -87,23 +128,37 @@ class Add(NumberOperation):
         self.expression2 = expression2
 
     def convert_to_text(self):
-        return 'the addition of ' + self.expression1.convert_to_text() + ' and ' + self.expression2.convert_to_text()
+        return '[the addition of ' + self.expression1.convert_to_text() + ' and ' + self.expression2.convert_to_text() + ']'
 
     def convert_to_solidity(self):
         return '(' + self.expression1.convert_to_solidity() + ' + ' + self.expression2.convert_to_solidity() + ')'
 
+    @staticmethod
+    def parse_expression_from_text(text):
+        left_part = find_left_part(text)
+        right_part = find_right_part(text)
+        return Add(Expression.parse_expression_from_text(left_part),
+                        Expression.parse_expression_from_text(right_part))
+
 
 class Divide(NumberOperation):
-    def __init__(self, divident: Expression, divider: Expression):
+    def __init__(self, divider: Expression, divident: Expression):
         NumberOperation.__init__(self)
         self.divider = divider
         self.divident = divident
 
     def convert_to_text(self):
-        return 'the division of ' + self.divider.convert_to_text() + ' from ' + self.divident.convert_to_text()
+        return '[the division of ' + self.divider.convert_to_text() + ' from ' + self.divident.convert_to_text() + ']'
 
     def convert_to_solidity(self):
         return '(' + self.divider.convert_to_solidity() + ' / ' + self.divident.convert_to_solidity() + ')'
+
+    @staticmethod
+    def parse_expression_from_text(text):
+        left_part = find_left_part(text)
+        right_part = find_right_part(text)
+        return Divide(Expression.parse_expression_from_text(left_part),
+                        Expression.parse_expression_from_text(right_part))
 
 
 class BooleanOperation(Expression):
@@ -116,6 +171,10 @@ class BooleanOperation(Expression):
     def convert_to_solidity(self):
         pass
 
+    @staticmethod
+    def parse_expression_from_text(text):
+        pass
+
 
 class Equal(BooleanOperation):
     def __init__(self, e1: Expression, e2: Expression):
@@ -124,10 +183,16 @@ class Equal(BooleanOperation):
         self.e2 = e2
 
     def convert_to_text(self):
-        return self.e1.convert_to_text() + ' is equal to ' + self.e2.convert_to_text()
+        return '[the equal relationship of ' + self.e1.convert_to_text() + ' and ' + self.e2.convert_to_text() + ']'
 
     def convert_to_solidity(self):
-        return self.e1.convert_to_solidity() + ' == ' + self.e2.convert_to_solidity()
+        return '(' + self.e1.convert_to_solidity() + ' == ' + self.e2.convert_to_solidity() + ')'
+
+    @staticmethod
+    def parse_expression_from_text(text):
+        left_part = find_left_part(text)
+        right_part = find_right_part(text)
+        return Equal(left_part, right_part)
 
 class LargerEqual(BooleanOperation):
     def __init__(self, e1: Expression, e2: Expression):
@@ -136,10 +201,16 @@ class LargerEqual(BooleanOperation):
         self.e2 = e2
 
     def convert_to_text(self):
-        return self.e1.convert_to_text() + ' is larger or equal to ' + self.e2.convert_to_text()
+        return '[the larger or equal relationship of ' + self.e1.convert_to_text() + ' and ' + self.e2.convert_to_text() + ']'
 
     def convert_to_solidity(self):
-        return self.e1.convert_to_solidity() + ' >= ' + self.e2.convert_to_solidity()
+        return '(' + self.e1.convert_to_solidity() + ' >= ' + self.e2.convert_to_solidity() + ')'
+
+    @staticmethod
+    def parse_expression_from_text(text):
+        left_part = find_left_part(text)
+        right_part = find_right_part(text)
+        return LargerEqual(left_part, right_part)
 
 class Larger(BooleanOperation):
     def __init__(self, e1: Expression, e2: Expression):
@@ -148,10 +219,16 @@ class Larger(BooleanOperation):
         self.e2 = e2
 
     def convert_to_text(self):
-        return self.e1.convert_to_text() + ' is larger than ' + self.e2.convert_to_text()
+        return '[the larger relationship of ' + self.e1.convert_to_text() + ' and ' + self.e2.convert_to_text() + ']'
 
     def convert_to_solidity(self):
-        return self.e1.convert_to_solidity() + ' > ' + self.e2.convert_to_solidity()
+        return '(' + self.e1.convert_to_solidity() + ' > ' + self.e2.convert_to_solidity() + ')'
+
+    @staticmethod
+    def parse_expression_from_text(text):
+        left_part = find_left_part(text)
+        right_part = find_right_part(text)
+        return Larger(left_part, right_part)
 
 
 class Enum(Expression):
@@ -168,19 +245,21 @@ class Enum(Expression):
 
 
 class Call(Expression):
-    def __init__(self, name: str, args: [Expression]):
+    def __init__(self, name: str, args: [Variable]):
         Expression.__init__(self)
         self.name = name
         self.args = args
 
     def convert_to_text(self):
-        text = ''
+        text = '['
         for arg in self.args:
             text += (arg.convert_to_text() + ', ')
 
-        text = text[0:len(text)- 2]
 
-        text = 'the calling of ' + self.name + ('' if len(self.args) == 0 else ' with argument(s) ' + text)
+        text = text[0:len(text)- 2]
+        text += ']'
+
+        text = '[the calling of ' + self.name + ('' if len(self.args) == 0 else ' with argument(s) ' + text) + ']'
         return text
 
     def convert_to_solidity(self):
@@ -190,3 +269,10 @@ class Call(Expression):
         code = code[0:len(code) - 2]
         code = self.name + '(' + code + ')'
         return code
+
+    @staticmethod
+    def parse_expression_from_text(text):
+        name = find_left_part(text)
+        right_part = find_right_part(text)
+        args = parse_args(right_part)
+        return Call.parse_expression_from_text(name, args)

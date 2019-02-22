@@ -180,7 +180,7 @@ class DefineIfElse(Template):
         text = ''
 
         text += 'There is an if else block defined as follows.\n'
-        text += 'Condition: ' + self.bool_cond.convert_to_text()
+        text += 'Condition: ' + self.bool_cond.convert_to_text() + '\n'
         text += 'True Statements: \n'
         for true_stm in self.true_stms:
             text += true_stm.convert_to_text() + '\n'
