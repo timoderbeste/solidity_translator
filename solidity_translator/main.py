@@ -83,10 +83,18 @@ def main():
     # print(en.convert_to_text())
     # print(en.convert_to_solidity())
     # print('\n')
-    #
+
+    print('constructing...')
     call = Call('foo', [Variable('a'), Variable('b')])
+    call_text = call.convert_to_text()
     print(call.convert_to_text())
     print(call.convert_to_solidity())
+    print('\n')
+
+    print('parsing...')
+    parsed_call = Call.parse_expression_from_text(call_text)
+    print(parsed_call.convert_to_text())
+    print(parsed_call.convert_to_solidity())
     print('\n')
 
     # call = Call('foo', [])

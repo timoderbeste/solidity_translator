@@ -259,7 +259,7 @@ class Call(Expression):
         text = text[0:len(text)- 2]
         text += ']'
 
-        text = '[the calling of ' + self.name + ('' if len(self.args) == 0 else ' with argument(s) ' + text) + ']'
+        text = '[the calling of [' + self.name + (']' if len(self.args) == 0 else '] with argument(s) ' + text) + ']'
         return text
 
     def convert_to_solidity(self):
@@ -272,7 +272,8 @@ class Call(Expression):
 
     @staticmethod
     def parse_expression_from_text(text):
-        name = find_left_part(text)
+        name = find_left_part(text)[1:-1]
         right_part = find_right_part(text)
-        args = parse_args(right_part)
-        return Call.parse_expression_from_text(name, args)
+        args = parse_args(right_part[1:-1])
+        args = list(map(lambda n: Variable(n[1:-1]), args))
+        return Call(name, args)
