@@ -78,11 +78,19 @@ def main():
     # print(cn.convert_to_text())
     # print(cn.convert_to_solidity())
     # print('\n')
-    #
-    # en = Enum('State', 'Created')
-    # print(en.convert_to_text())
-    # print(en.convert_to_solidity())
-    # print('\n')
+
+    print('constructing...')
+    en = Enum('State', 'Created')
+    en_text = en.convert_to_text()
+    print(en.convert_to_text())
+    print(en.convert_to_solidity())
+    print('\n')
+
+    print('parsing...')
+    parsed_en = Enum.parse_expression_from_text(en_text)
+    print(parsed_en.convert_to_text())
+    print(parsed_en.convert_to_solidity())
+    print('\n')
 
     print('constructing...')
     call = Call('foo', [Variable('a'), Variable('b')])

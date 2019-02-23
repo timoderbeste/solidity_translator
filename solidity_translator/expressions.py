@@ -238,10 +238,16 @@ class Enum(Expression):
         self.component_name = component_name
 
     def convert_to_text(self):
-        return self.component_name + ' of ' + self.enum_name
+        return '[[' + self.component_name + '] of [' + self.enum_name + ']]'
 
     def convert_to_solidity(self):
         return self.enum_name + '.' + self.component_name
+
+    @staticmethod
+    def parse_expression_from_text(text):
+        left_part = find_left_part(text)
+        right_part = find_right_part(text)
+        return Enum(right_part[1:-1], left_part[1:-1])
 
 
 class Call(Expression):
