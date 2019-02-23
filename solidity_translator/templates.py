@@ -10,6 +10,10 @@ class Template:
     def convert_to_solidity(self):
         pass
 
+    @staticmethod
+    def parse_template_from_text(text: str):
+        pass
+
 class Require(Template):
     def __init__(self, context, boe: BooleanOperation):
         Template.__init__(self)
@@ -17,10 +21,15 @@ class Require(Template):
         self.context = context
 
     def convert_to_text(self):
-        return (('This ' + self.context) if self.context is not None else 'It') + ' checks that ' + self.boe.convert_to_text()
+        return (('This ' + self.context) if self.context is not None else 'It') + ' checks ' + self.boe.convert_to_text()
 
     def convert_to_solidity(self):
         return 'require(' + self.boe.convert_to_solidity() + ');'
+
+    @staticmethod
+    def parse_template_from_text(text: str):
+        return Require(None, Expression.parse_expression_from_text(text[text.find('checks') + len('checks') + 1:]))
+
 
 class DefineEnum(Template):
     def __init__(self, context, name: str, elems: [str]):
@@ -33,6 +42,8 @@ class DefineEnum(Template):
         elems_str = ''
         for elem in self.elems:
             elems_str += str(elem) + ', '
+
+        elems_str = elems_str[:-2]
         return (('This ' + self.context) if self.context is not None else 'It') + ' has an enum called ' + self.name + ' that has ' + elems_str
 
     def convert_to_solidity(self):
@@ -45,6 +56,13 @@ class DefineEnum(Template):
         elems_code += '}'
 
         return 'enum ' + self.name + elems_code
+
+    @staticmethod
+    def parse_template_from_text(text: str):
+        name = text[text.find('an enum called') + len('an enum called '):text.find(' that has')]
+        elems = text[text.find(' that has ') + len(' that has '):].replace(' ', '').split(',')
+        return DefineEnum(None, name, elems)
+
 
 class DefineVariable(Template):
     def __init__(self, context: str, name: str, options: [str], value: Expression):
@@ -82,6 +100,26 @@ class DefineVariable(Template):
             return self.value.convert_to_solidity() + ';'
         return options_code + self.name + (';' if self.value is None else (' = '
                                            + self.value.convert_to_solidity() + ';'))
+
+    @staticmethod
+    def parse_template_from_text(text: str):
+        if text.startswith('The variable'):
+            name = text[len('The variable '):text.find(' is assigned a value')]
+            value_text = text[text.find(' is assigned a value ') + len(' is assigned a value '):]
+            return DefineVariable(None, name, None, Expression.parse_expression_from_text(value_text))
+        else:
+            options = text[text.find(' has a ') + len(' has a '):text.find('variable called ')].split(' ')
+            options.remove('')
+            options = None if options == [] else options
+
+            if text.find('with an assignment value') != -1:
+                name = text[text.find('variable called ') + len('variable called '):text.find(' with an assigned value')]
+                value_text = text[text.find('with an assigned value ') + len('with an assigned value '):]
+                return DefineVariable(None, name, options, Expression.parse_expression_from_text(value_text))
+            else:
+                name = text[text.find('variable called ') + len('variable called '):]
+                return DefineVariable(None, name, options, None)
+
 
 class DefineFunction(Template):
     def __init__(self, context: str, name: str, options: [str], params: [DefineVariable], components: [Template]):

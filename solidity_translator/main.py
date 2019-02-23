@@ -46,28 +46,61 @@ def main():
     print(parsed_d.convert_to_solidity())
     print('\n')
 
-    # e = Equal(d1, d2)
-    # r = Require(None, e)
-    # print(r.convert_to_text())
-    # print(r.convert_to_solidity())
-    # print('\n')
 
-    #
-    # en = DefineEnum('contract', 'State', ['Created, Locked, Inactive'])
-    # print(en.convert_to_text())
-    # print(en.convert_to_solidity())
-    # print('\n')
-    #
-    #
-    # dv1 = DefineVariable('contract', 'value', ['uint', 'public'], None)
-    # print(dv1.convert_to_text())
-    # print(dv1.convert_to_solidity())
-    # print('\n')
-    #
-    # dv2 = DefineVariable('contract', 'value', None, Number(10))
-    # print(dv2.convert_to_text())
-    # print(dv2.convert_to_solidity())
-    # print('\n')
+    print('constructing...')
+    e = Equal(d1, d2)
+    r = Require(None, e)
+    r_text = r.convert_to_text()
+    print(r.convert_to_text())
+    print(r.convert_to_solidity())
+    print('\n')
+
+    print('parsing...')
+    parsed_r = Require.parse_template_from_text(r_text)
+    print(parsed_r.convert_to_text())
+    print(parsed_r.convert_to_solidity())
+    print('\n')
+
+
+    print('constructing...')
+    en = DefineEnum('contract', 'State', ['Created, Locked, Inactive'])
+    en_text = en.convert_to_text()
+    print(en.convert_to_text())
+    print(en.convert_to_solidity())
+    print('\n')
+
+    print('parsing...')
+    parsed_en = DefineEnum.parse_template_from_text(en_text)
+    print(parsed_en.convert_to_text())
+    print(parsed_en.convert_to_solidity())
+    print('\n')
+
+
+    print('constructing...')
+    dv1 = DefineVariable('contract', 'value', ['uint', 'public'], None)
+    dv1_text = dv1.convert_to_text()
+    print(dv1.convert_to_text())
+    print(dv1.convert_to_solidity())
+    print('\n')
+
+    print('parsing...')
+    parsed_dv1 = DefineVariable.parse_template_from_text(dv1_text)
+    print(parsed_dv1.convert_to_text())
+    print(parsed_dv1.convert_to_solidity())
+    print('\n')
+
+    print('constructing...')
+    dv2 = DefineVariable('contract', 'value', None, Number(10))
+    dv2_text = dv2.convert_to_text()
+    print(dv2.convert_to_text())
+    print(dv2.convert_to_solidity())
+    print('\n')
+
+    print('parsing...')
+    parsed_dv2 = DefineVariable.parse_template_from_text(dv2_text)
+    print(parsed_dv2.convert_to_text())
+    print(parsed_dv2.convert_to_solidity())
+    print('\n')
     #
     # fn = DefineFunction(None, 'foo', [], [DefineVariable(None, 'a', ['uint'], None), DefineVariable(None, 'b', ['uint'], None)], [DefineVariable('function', 'c', ['uint'], Multiply(Variable('a'), Variable('b')))])
     # print(fn.convert_to_text())

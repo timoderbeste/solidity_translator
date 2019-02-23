@@ -28,6 +28,10 @@ class Expression:
             return LargerEqual.parse_expression_from_text(text)
         elif text.startswith('[the larger relationship of'):
             return Larger.parse_expression_from_text(text)
+        elif text.startswith('[an enum which is'):
+            return Enum.parse_expression_from_text(text)
+        elif text.startswith('[the calling of'):
+            return Call.parse_expression_from_text(text)
         else:
             return Variable(text)
 
@@ -192,7 +196,7 @@ class Equal(BooleanOperation):
     def parse_expression_from_text(text):
         left_part = find_left_part(text)
         right_part = find_right_part(text)
-        return Equal(left_part, right_part)
+        return Equal(Expression.parse_expression_from_text(left_part), Expression.parse_expression_from_text(right_part))
 
 class LargerEqual(BooleanOperation):
     def __init__(self, e1: Expression, e2: Expression):
@@ -210,7 +214,7 @@ class LargerEqual(BooleanOperation):
     def parse_expression_from_text(text):
         left_part = find_left_part(text)
         right_part = find_right_part(text)
-        return LargerEqual(left_part, right_part)
+        return LargerEqual(Expression.parse_expression_from_text(left_part), Expression.parse_expression_from_text(right_part))
 
 class Larger(BooleanOperation):
     def __init__(self, e1: Expression, e2: Expression):
@@ -228,7 +232,7 @@ class Larger(BooleanOperation):
     def parse_expression_from_text(text):
         left_part = find_left_part(text)
         right_part = find_right_part(text)
-        return Larger(left_part, right_part)
+        return Larger(Expression.parse_expression_from_text(left_part), Expression.parse_expression_from_text(right_part))
 
 
 class Enum(Expression):
@@ -238,7 +242,7 @@ class Enum(Expression):
         self.component_name = component_name
 
     def convert_to_text(self):
-        return '[[' + self.component_name + '] of [' + self.enum_name + ']]'
+        return '[an enum which is [' + self.component_name + '] of [' + self.enum_name + ']]'
 
     def convert_to_solidity(self):
         return self.enum_name + '.' + self.component_name
@@ -283,3 +287,8 @@ class Call(Expression):
         args = parse_args(right_part[1:-1])
         args = list(map(lambda n: Variable(n[1:-1]), args))
         return Call(name, args)
+
+
+if __name__ == '__main__':
+    print(Expression.parse_expression_from_text('[the calling of [foo] with argument(s) [[a], [b]]]').convert_to_solidity())
+    print(Expression.parse_expression_from_text('[the division of [the product of [10] and [20]] from [the division of [10] from [20]]]').convert_to_solidity())
