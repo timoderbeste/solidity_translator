@@ -70,6 +70,65 @@ def parse_args(text: str):
     return text.replace(' ', '').split(',')
 
 
+def extract_next_template_for_parsing(statements: [str]) -> ([str], [str]):
+    if len(statements) == 0:
+        return []
+    elif statements[0].startswith('There is a for loop'):
+        return extract_for_template_for_parsing(statements)
+    elif statements[0].startswith('There is an if else block'):
+        return extract_if_else_template_for_parsing(statements)
+    elif statements[0].find('function called') != -1:
+        return extract_function_template_for_parsing(statements)
+    else:
+        return [statements[0]], statements[1:]
+
+
+def extract_for_template_for_parsing(statements: [str]) -> ([str], [str]):
+    for_template_statements = []
+    cnt = 0
+    for stm in statements:
+        for_template_statements.append(stm)
+        if stm.startswith('There is a for loop'):
+            cnt += 1
+        elif stm.startswith('This is the end of the description of the for loop'):
+            cnt -= 1
+
+        if cnt == 0:
+            break
+
+    return for_template_statements, statements[len(for_template_statements):]
+
+
+def extract_if_else_template_for_parsing(statements: [str]) -> ([str], [str]):
+    if_else_template_statements = []
+    cnt = 0
+    for stm in statements:
+        if_else_template_statements.append(stm)
+        if stm.startswith('There is an if else block'):
+            cnt += 1
+        elif stm.startswith('This is the end of the description of the if else block'):
+            cnt -= 1
+
+        if cnt == 0:
+            break
+
+    return if_else_template_statements, statements[len(if_else_template_statements):]
+
+
+def extract_function_template_for_parsing(statements: [str]) -> ([str], [str]):
+    function_template_statements = []
+    cnt = 0
+    for stm in statements:
+        function_template_statements.append(stm)
+        if stm.find('function called') != -1:
+            cnt += 1
+        elif stm.startswith('This is the end of the description of the function'):
+            cnt -= 1
+
+        if cnt == 0:
+            break
+
+    return function_template_statements, statements[len(function_template_statements):]
 
 
 if __name__ == '__main__':

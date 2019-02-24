@@ -11,7 +11,7 @@ class Template:
         pass
 
     @staticmethod
-    def parse_template_from_text(text: str):
+    def parse_template_from_text(text: [str]):
         pass
 
 class Require(Template):
@@ -27,8 +27,27 @@ class Require(Template):
         return 'require(' + self.boe.convert_to_solidity() + ');'
 
     @staticmethod
-    def parse_template_from_text(text: str):
+    def parse_template_from_text(text: [str]):
+        text = text[0]
         return Require(None, Expression.parse_expression_from_text(text[text.find('checks') + len('checks') + 1:]))
+
+
+class Emit(Template):
+    def __init__(self, e: Expression):
+        Template.__init__(self)
+        self.e = e
+
+    def convert_to_text(self):
+        return 'It emits the following: ' + self.e.convert_to_text()
+
+    def convert_to_solidity(self):
+        return 'emit ' + self.e.convert_to_solidity()
+
+    @staticmethod
+    def parse_template_from_text(text: [str]):
+        text = text[0]
+        exp_text = text[len('It emits the following: '):]
+        return Emit(Expression.parse_expression_from_text(exp_text))
 
 
 class DefineEnum(Template):
@@ -58,7 +77,8 @@ class DefineEnum(Template):
         return 'enum ' + self.name + elems_code
 
     @staticmethod
-    def parse_template_from_text(text: str):
+    def parse_template_from_text(text: [str]):
+        text = text[0]
         name = text[text.find('an enum called') + len('an enum called '):text.find(' that has')]
         elems = text[text.find(' that has ') + len(' that has '):].replace(' ', '').split(',')
         return DefineEnum(None, name, elems)
@@ -102,7 +122,9 @@ class DefineVariable(Template):
                                            + self.value.convert_to_solidity() + ';'))
 
     @staticmethod
-    def parse_template_from_text(text: str):
+    def parse_template_from_text(text: [str]):
+        text = text[0]
+
         if text.startswith('The variable'):
             name = text[len('The variable '):text.find(' is assigned a value')]
             value_text = text[text.find(' is assigned a value ') + len(' is assigned a value '):]
@@ -119,6 +141,81 @@ class DefineVariable(Template):
             else:
                 name = text[text.find('variable called ') + len('variable called '):]
                 return DefineVariable(None, name, options, None)
+
+
+class DefineFor(Template):
+    def __init__(self, var: DefineVariable, bool_cond: BooleanOperation, increment: DefineVariable, components: [Template]):
+        Template.__init__(self)
+        self.var = var
+        self.bool_cond = bool_cond
+        self.increment = increment
+        self.components = components
+
+    def convert_to_text(self):
+        text = ''
+        text += 'There is a for loop defined as follows.\n'
+        text += self.var.convert_to_text() + '\n'
+        text += 'The condition is: ' + self.bool_cond.convert_to_text() + '\n'
+        text += 'The incrementing part is: ' + self.increment.convert_to_text() + '\n'
+        text += 'It has the following components:\n'
+        for component in self.components:
+            text += component.convert_to_text() + '\n'
+
+        text += 'This is the end of the description of the for loop\n'
+        return text
+
+    def convert_to_solidity(self):
+        code = 'for (' + self.var.convert_to_solidity().replace(';', '') + '; ' + self.bool_cond.convert_to_solidity() + '; ' + self.increment.convert_to_solidity().replace(';', '') + ') {\n'
+
+        for component in self.components:
+            code += component.convert_to_solidity() + '\n'
+
+        code += '}'
+
+        return code
+
+    @staticmethod
+    def parse_template_from_text(text: [str]):
+        pass
+    
+    
+class DefineIfElse(Template):
+    def __init__(self, bool_cond: BooleanOperation, true_stms: [Template], false_stms: [Template]):
+        Template.__init__(self)
+        self.bool_cond = bool_cond
+        self.true_stms = true_stms
+        self.false_stms = false_stms
+
+    def convert_to_text(self):
+        text = ''
+
+        text += 'There is an if else block defined as follows.\n'
+        text += 'Condition: ' + self.bool_cond.convert_to_text() + '\n'
+        text += 'True Statements: \n'
+        for true_stm in self.true_stms:
+            text += true_stm.convert_to_text() + '\n'
+        text += 'False Statements: \n'
+        for false_stm in self.false_stms:
+            text += false_stm.convert_to_text() + '\n'
+        text += 'This is the end of the description of the if else block\n'
+        return text
+
+    def convert_to_solidity(self):
+        code = ''
+        code += 'if (' + self.bool_cond.convert_to_solidity() + ') {\n'
+        for true_stm in self.true_stms:
+            code += true_stm.convert_to_solidity() + '\n'
+        code += '}\n'
+        code += 'else {\n'
+        for false_stm in self.false_stms:
+            code += false_stm.convert_to_solidity() + '\n'
+        code += '}'
+
+        return code
+
+    @staticmethod
+    def parse_template_from_text(text: [str]):
+        pass
 
 
 class DefineFunction(Template):
@@ -148,7 +245,7 @@ class DefineFunction(Template):
         text += (('This ' + self.context) if self.context is not None else 'It') + ' has a ' + options_str + 'function called ' + self.name + ((' with parameters: ' + params_str) if self.params is not None else '' ) + '\n'
         for component in self.components:
             text += component.convert_to_text() + '\n'
-        text += 'This is the end of the description of the function ' + self.name
+        text += 'This is the end of the description of the function ' + self.name + '\n'
 
         return text
 
@@ -174,72 +271,9 @@ class DefineFunction(Template):
 
         return code
 
-
-class DefineFor(Template):
-    def __init__(self, var: DefineVariable, bool_cond: BooleanOperation, increment: DefineVariable, components: [Template]):
-        Template.__init__(self)
-        self.var = var
-        self.bool_cond = bool_cond
-        self.increment = increment
-        self.components = components
-
-    def convert_to_text(self):
-        text = ''
-        text += 'There is a for loop defined as follows.\n'
-        text += self.var.convert_to_text() + '\n'
-        text += 'The condition is: ' + self.bool_cond.convert_to_text() + '\n'
-        text += 'The incrementing part is: ' + self.increment.convert_to_text() + '\n'
-        text += 'It has the following components:\n'
-        for component in self.components:
-            text += component.convert_to_text() + '\n'
-
-        text += 'This is the end of the description of the for loop'
-        return text
-
-    def convert_to_solidity(self):
-        code = 'for (' + self.var.convert_to_solidity().replace(';', '') + '; ' + self.bool_cond.convert_to_solidity() + '; ' + self.increment.convert_to_solidity().replace(';', '') + ') {\n'
-
-        for component in self.components:
-            code += component.convert_to_solidity() + '\n'
-
-        code += '}'
-
-        return code
-    
-    
-class DefineIfElse(Template):
-    def __init__(self, bool_cond: BooleanOperation, true_stms: [Template], false_stms: [Template]):
-        Template.__init__(self)
-        self.bool_cond = bool_cond
-        self.true_stms = true_stms
-        self.false_stms = false_stms
-
-    def convert_to_text(self):
-        text = ''
-
-        text += 'There is an if else block defined as follows.\n'
-        text += 'Condition: ' + self.bool_cond.convert_to_text() + '\n'
-        text += 'True Statements: \n'
-        for true_stm in self.true_stms:
-            text += true_stm.convert_to_text() + '\n'
-        text += 'False Statements: \n'
-        for false_stm in self.false_stms:
-            text += false_stm.convert_to_text() + '\n'
-        text += 'This is the end of the description of the if else block'
-        return text
-
-    def convert_to_solidity(self):
-        code = ''
-        code += 'if (' + self.bool_cond.convert_to_solidity() + ') {\n'
-        for true_stm in self.true_stms:
-            code += true_stm.convert_to_solidity() + '\n'
-        code += '}\n'
-        code += 'else {\n'
-        for false_stm in self.false_stms:
-            code += false_stm.convert_to_solidity() + '\n'
-        code += '}'
-
-        return code
+    @staticmethod
+    def parse_template_from_text(text: [str]):
+        pass
 
 
 class DefineContract(Template):
@@ -261,18 +295,10 @@ class DefineContract(Template):
         code += 'contract ' + self.name + ' {\n'
         for component in self.components:
             code += component.convert_to_solidity() + '\n'
-        code += '}'
+        code += '}\n'
 
         return code
 
-
-class Emit(Template):
-    def __init__(self, e: Expression):
-        Template.__init__(self)
-        self.e = e
-
-    def convert_to_text(self):
-        return 'It emits the following: ' + self.e.convert_to_text()
-
-    def convert_to_solidity(self):
-        return 'emit ' + self.e.convert_to_solidity()
+    @staticmethod
+    def parse_template_from_text(text: [str]):
+        pass

@@ -138,11 +138,21 @@ def main():
     print(parsed_call.convert_to_solidity())
     print('\n')
 
-    # call = Call('foo', [])
-    # emit = Emit(call)
-    # print(emit.convert_to_text())
-    # print(emit.convert_to_solidity())
-    # print('\n')
+
+    print('constructing...')
+    call = Call('foo', [])
+    emit = Emit(call)
+    emit_text = emit.convert_to_text()
+    print(emit.convert_to_text())
+    print(emit.convert_to_solidity())
+    print('\n')
+
+    print('parsing')
+    parsed_emit = Emit.parse_template_from_text(emit_text)
+    print(parsed_emit.convert_to_text())
+    print(parsed_emit.convert_to_solidity())
+    print('\n')
+
     #
     # for_loop = DefineFor(DefineVariable(None, 'i', ['uint'], Number(0)), Larger(Variable('proposalNames.length'), Variable('i')), DefineVariable(None, 'i', None, Add(Variable('i'), Number(1))), [
     #     DefineVariable(None, None, None, Call('print', [Variable('i')]))

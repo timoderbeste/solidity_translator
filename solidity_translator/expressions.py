@@ -261,15 +261,16 @@ class Call(Expression):
         self.args = args
 
     def convert_to_text(self):
-        text = '['
-        for arg in self.args:
-            text += (arg.convert_to_text() + ', ')
+        if self.args is None or self.args == []:
+            text = '[]'
+        else:
+            text = '['
+            for arg in self.args:
+                text += (arg.convert_to_text() + ', ')
+            text = text[0:len(text)- 2]
+            text += ']'
 
-
-        text = text[0:len(text)- 2]
-        text += ']'
-
-        text = '[the calling of [' + self.name + (']' if len(self.args) == 0 else '] with argument(s) ' + text) + ']'
+        text = '[the calling of [' + self.name + '] with argument(s) ' + text + ']'
         return text
 
     def convert_to_solidity(self):
@@ -284,8 +285,11 @@ class Call(Expression):
     def parse_expression_from_text(text):
         name = find_left_part(text)[1:-1]
         right_part = find_right_part(text)
-        args = parse_args(right_part[1:-1])
-        args = list(map(lambda n: Variable(n[1:-1]), args))
+        if right_part == '[]':
+            args = []
+        else:
+            args = parse_args(right_part[1:-1])
+            args = list(map(lambda n: Variable(n[1:-1]), args))
         return Call(name, args)
 
 
