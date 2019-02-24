@@ -131,7 +131,8 @@ def extract_function_template_for_parsing(statements: [str]) -> ([str], [str]):
     return function_template_statements, statements[len(function_template_statements):]
 
 
-if __name__ == '__main__':
+# testing code
+def test_find_parts():
     s = '[the division of [the division of [the product of [10] and [20]] from [10]] from [the product of [10] and [20]]]'
     l1 = find_left_part(s)
     print('left part 1:', l1)
@@ -143,4 +144,58 @@ if __name__ == '__main__':
 
     r2 = find_right_part(l1)
     print('right part 2:', r2)
+
+
+def test_extractors():
+    testing_statements = [
+        # 'It has a function called foo',
+        # 'There is a for loop',
+        'There is a for loop',
+        'There is an if else block',
+        'True statements',
+        'There is an if else block',
+        'True statements',
+        'False statements',
+        'This is the end of the description of the if else block',
+        'False statements',
+        'This is the end of the description of the if else block',
+        'This is the end of the description of the for loop',
+        'There is an if else block',
+        'True statements',
+        'There is an if else block',
+        'True statements',
+        'False statements',
+        'This is the end of the description of the if else block',
+        'False statements',
+        'This is the end of the description of the if else block',
+        'There is a for loop',
+        'There is an if else block',
+        'True statements',
+        'False statements',
+        'There is an if else block',
+        'True statements',
+        'False statements',
+        'This is the end of the description of the if else block',
+        'This is the end of the description of the if else block',
+        # 'This is the end of the description of the for loop',
+        # 'This is the end of the description of the function'
+    ]
+
+    rest_statements = testing_statements
+    step = 0
+
+    while len(rest_statements) != 0:
+        next_template_statements, rest_statements = extract_next_template_for_parsing(rest_statements)
+        print('step', step)
+        print('next_template_statements', next_template_statements)
+        print('rest_statements', rest_statements)
+
+
+
+if __name__ == '__main__':
+    test_extractors()
+
+
+
+
 
