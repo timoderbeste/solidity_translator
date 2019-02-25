@@ -33,7 +33,7 @@ class Expression:
         elif text.startswith('[the calling of'):
             return Call.parse_expression_from_text(text)
         else:
-            return Variable(text)
+            return Variable.parse_expression_from_text(text)
 
 
 class Variable(Expression):
@@ -177,7 +177,14 @@ class BooleanOperation(Expression):
 
     @staticmethod
     def parse_expression_from_text(text):
-        pass
+        if text.find('equal relationship') != -1:
+            return Equal.parse_expression_from_text(text)
+        elif text.find('larger or equal') != -1:
+            return LargerEqual.parse_expression_from_text(text)
+        elif text.find('larger relationship') != -1:
+            return Larger.parse_expression_from_text(text)
+
+        return None
 
 
 class Equal(BooleanOperation):

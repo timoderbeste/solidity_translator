@@ -69,7 +69,6 @@ def find_right_part(text: str):
 def parse_args(text: str):
     return text.replace(' ', '').split(',')
 
-
 def extract_next_template_for_parsing(statements: [str]) -> ([str], [str]):
     if len(statements) == 0:
         return []
@@ -189,7 +188,6 @@ def test_extractors():
         print('step', step)
         print('next_template_statements', next_template_statements)
         print('rest_statements', rest_statements)
-
 
 
 if __name__ == '__main__':

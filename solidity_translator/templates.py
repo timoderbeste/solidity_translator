@@ -12,7 +12,24 @@ class Template:
 
     @staticmethod
     def parse_template_from_text(text: [str]):
-        pass
+        if len(text) == 1:
+            if text[0].find('checks') != -1:
+                return Require.parse_template_from_text(text)
+            elif text[0].find('It emits the following') != -1:
+                return Emit.parse_template_from_text(text)
+            elif text[0].find('has an enum called') != -1:
+                return DefineEnum.parse_template_from_text(text)
+            else:
+                return DefineVariable.parse_template_from_text(text)
+
+        else:
+            if text[0].startswith('There is a for loop'):
+                return DefineFor.parse_template_from_text(text)
+            elif text[0].startswith('There is an if else block'):
+                return DefineIfElse.parse_template_from_text(text)
+            else:
+                return DefineFunction.parse_template_from_text(text)
+
 
 class Require(Template):
     def __init__(self, context, boe: BooleanOperation):
@@ -129,18 +146,21 @@ class DefineVariable(Template):
             name = text[len('The variable '):text.find(' is assigned a value')]
             value_text = text[text.find(' is assigned a value ') + len(' is assigned a value '):]
             return DefineVariable(None, name, None, Expression.parse_expression_from_text(value_text))
-        else:
+        elif text.find('has a') != -1 and text.find('variable called') != -1:
             options = text[text.find(' has a ') + len(' has a '):text.find('variable called ')].split(' ')
             options.remove('')
             options = None if options == [] else options
 
-            if text.find('with an assignment value') != -1:
+            if text.find('with an assigned value') != -1:
                 name = text[text.find('variable called ') + len('variable called '):text.find(' with an assigned value')]
                 value_text = text[text.find('with an assigned value ') + len('with an assigned value '):]
                 return DefineVariable(None, name, options, Expression.parse_expression_from_text(value_text))
-            else:
+            elif text.find('variable called') != -1:
                 name = text[text.find('variable called ') + len('variable called '):]
                 return DefineVariable(None, name, options, None)
+        else:
+            value_text = text
+            return DefineVariable(None, None, None, Call.parse_expression_from_text(value_text))
 
 
 class DefineFor(Template):
@@ -153,7 +173,7 @@ class DefineFor(Template):
 
     def convert_to_text(self):
         text = ''
-        text += 'There is a for loop defined as follows.\n'
+        text += 'There is a for loop defined as follows\n'
         text += self.var.convert_to_text() + '\n'
         text += 'The condition is: ' + self.bool_cond.convert_to_text() + '\n'
         text += 'The incrementing part is: ' + self.increment.convert_to_text() + '\n'
@@ -174,11 +194,35 @@ class DefineFor(Template):
 
         return code
 
+    # This function assumes that text has the following structure:
+    # 'There is a for loop',
+    # 'There is an if else block',
+    # 'True statements',
+    # 'There is an if else block',
+    # 'True statements',
+    # 'False statements',
+    # 'This is the end of the description of the if else block',
+    # 'False statements',
+    # 'This is the end of the description of the if else block',
+    # 'This is the end of the description of the for loop',
     @staticmethod
     def parse_template_from_text(text: [str]):
-        pass
+        var_statement = text[1].strip('\n')
+        cond_statement = text[2][len('The condition is: '):].strip('\n')
+        increment_statement = text[3][len('The incrementing part is: '):].strip('\n')
+
+        # statements for the components of the for loop. skipping text[4] because it is irrelevant.
+        component_statements = text[5:-1]
+
+        var = DefineVariable.parse_template_from_text([var_statement])
+        bool_cond = BooleanOperation.parse_expression_from_text(cond_statement)
+        increment = DefineVariable.parse_template_from_text([increment_statement])
+
+        components = extract_component_templates(component_statements)
+        return DefineFor(var, bool_cond, increment, components)
+
     
-    
+
 class DefineIfElse(Template):
     def __init__(self, bool_cond: BooleanOperation, true_stms: [Template], false_stms: [Template]):
         Template.__init__(self)
@@ -189,7 +233,7 @@ class DefineIfElse(Template):
     def convert_to_text(self):
         text = ''
 
-        text += 'There is an if else block defined as follows.\n'
+        text += 'There is an if else block defined as follows\n'
         text += 'Condition: ' + self.bool_cond.convert_to_text() + '\n'
         text += 'True Statements: \n'
         for true_stm in self.true_stms:
@@ -213,9 +257,29 @@ class DefineIfElse(Template):
 
         return code
 
+    # This function assumes the following structure:
+    #
+    # There is an if else block defined as follows.
+    # Condition: [the larger relationship of [a] and [b]]
+    # True Statements:
+    # [the calling of [print] with argument(s) [[true]]]
+    # False Statements:
+    # [the calling of [print] with argument(s) [[false]]]
+    # This is the end of the description of the if else block
+
     @staticmethod
     def parse_template_from_text(text: [str]):
-        pass
+        ts_index = text.index('True Statements: ')
+        fs_index = text.index('False Statements: ')
+        cond_statement = text[1][len('Condition: '):]
+        true_statements = text[ts_index + 1:fs_index]
+        false_statements = text[fs_index + 1:-1]
+
+        bool_cond = BooleanOperation.parse_expression_from_text(cond_statement)
+        true_stms = extract_component_templates(true_statements)
+        false_stms = extract_component_templates(false_statements)
+
+        return DefineIfElse(bool_cond, true_stms, false_stms)
 
 
 class DefineFunction(Template):
@@ -224,8 +288,8 @@ class DefineFunction(Template):
         self.context = context
         self.name = name
         self.options = options
-        self.components = components
         self.params = params
+        self.components = components
 
     def convert_to_text(self):
         text = ''
@@ -271,9 +335,27 @@ class DefineFunction(Template):
 
         return code
 
+    # This function assumes the following structure:
+
+    # It has a function called foo with parameters: It has a uint variable called a, It has a uint variable called b
+    # This function has a uint variable called c with an assigned value [the product of [a] and [b]]
+    # This is the end of the description of the function foo
     @staticmethod
     def parse_template_from_text(text: [str]):
-        pass
+        name = text[0][text[0].find('function called ') + len('function called '):text[0].find(' with parameters')]
+        options_text = text[0][text[0].find('has a ') + len('has a '):text[0].find('function called')]
+        options = options_text.split(' ')
+        options.remove('')
+        options = None if options == [] else options
+
+        params_stms = text[0][text[0].find('with parameters: ') + len('with parameters: '):].replace(', ', ',').split(',')
+        params = list(map(lambda stm: DefineVariable.parse_template_from_text([stm]), params_stms))
+
+        component_statements = text[1:-1]
+        components = extract_component_templates(component_statements)
+
+        return DefineFunction(None, name, options, params, components)
+
 
 
 class DefineContract(Template):
@@ -284,10 +366,10 @@ class DefineContract(Template):
 
     def convert_to_text(self):
         text = ''
-        text += 'The following defines the contract ' + self.name + '.\n'
+        text += 'The following defines the contract ' + self.name + '\n'
         for component in self.components:
             text += component.convert_to_text() + '\n'
-        text += 'This is the end of the description of the contract ' + self.name + '.\n'
+        text += 'This is the end of the description of the contract ' + self.name + '\n'
         return text
 
     def convert_to_solidity(self):
@@ -299,6 +381,32 @@ class DefineContract(Template):
 
         return code
 
+
+    # This function assumes the following structure:
+
+    # The following defines the contract FOO.
+    # This contract has an enum called State that has Created, Locked, Inactive
+    # This contract has a uint public variable called value
+    # The variable value is assigned a value [10]
+    # It has a function called foo with parameters: It has a uint variable called a, It has a uint variable called b
+    # This function has a uint variable called c with an assigned value [the product of [a] and [b]]
+    # This is the end of the description of the function foo
+    # This is the end of the description of the contract FOO.
     @staticmethod
     def parse_template_from_text(text: [str]):
-        pass
+        name = text[0][len('The following defines the contract '):]
+        component_statements = text[1:-1]
+        components = extract_component_templates(component_statements)
+        return DefineContract(name, components)
+
+
+
+def extract_component_templates(statements: [str]) -> [Template]:
+    rest_statements = statements
+    templates = []
+
+    while len(rest_statements) != 0:
+        next_template_statements, rest_statements = extract_next_template_for_parsing(rest_statements)
+        templates.append(Template.parse_template_from_text(next_template_statements))
+
+    return templates
