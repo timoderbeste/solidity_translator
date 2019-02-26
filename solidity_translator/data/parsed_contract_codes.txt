@@ -1,0 +1,132 @@
+contract Q {
+int h = a((((-4954 * W((X == true), n.T, false, ((O(false, h((((3006 * w(4797, (false == false), (((V == (y == ((7193 * 5151) == ((x == n) == (x == true))))) == true) == false))) * 5934) == false), -1582, (-1920 * 9943), g(b, false, ((d * -2193) == n.q)), true), Z()) * (-9555 * u)) == -4845), (B(O) * 3467))) * ((p * u) * (1848 * H(((u((r((x == 5532), -6653, V, false) == 961), R(((q.I == P) == L.U), g.Z, false, l, C.h), l(), q(B, false, (i(x.F, (l == z.K), (Y == z.L)) * n()), true)) * 4347) == U(true)))))) == Q), u(true, ((6282 * (A(((F * d) == R)) * (g * r(A.s, true, x, ((T(O) == -9332) == true), (-5732 * U))))) * n), g(f.v, j(false, false, (d() == M)))));
+enum g {H, s, w, h, h}
+enum Y {q, r, V, z, f}
+}
+*******************************************
+contract Q {
+int o = -8724;
+boolean Y = g(true, (7384 == (Q(L.p, s, X(t.f, e.P), 8553) == (-3025 == (m == -5554)))), true, -1896);
+bytes32 u = false;
+float V = d;
+enum p {J}
+boolean v = -6939;
+}
+*******************************************
+contract O {
+enum T {p, f}
+float X = 7967;
+}
+*******************************************
+contract H {
+enum W {M, u, y}
+}
+*******************************************
+contract u {
+enum l {k, P, l, y, p}
+}
+*******************************************
+contract s {
+enum C {D, l}
+enum f {u, o, T, a}
+int F = -6103;
+}
+*******************************************
+contract H {
+function h(float f, boolean v, int X, int D, bytes32 a) public  {
+enum z {J, D, M}
+}
+}
+*******************************************
+contract X {
+enum y {K, E, Q, g}
+enum Z {e, U, p, a, M}
+address R = 7729;
+float D = i.W;
+X = 8960;
+uint l = (N(x(true)) * -6532);
+double z = 8793;
+enum b {c, Q, S, J, u}
+function E(X, int m, address I, bytes32 x, R) public  {
+enum G {W, y, B, Y, I}
+int K = true;
+}
+enum f {Z}
+}
+*******************************************
+contract R {
+int g = (R.x == 9702);
+}
+*******************************************
+contract t {
+enum M {O}
+enum o {M, A}
+enum C {s, f}
+}
+*******************************************
+contract M {
+enum x {M, Z, s}
+x = n((false == 2793), -5941);
+bytes32 Q = -8715;
+address n = B.y;
+}
+*******************************************
+contract S {
+bytes32 T = true;
+float B = d(S.E, g(o(), 6996, (a * 2384), false));
+}
+*******************************************
+contract x {
+int R = k(B.c, (C * (b * (5807 * N))), (U == true));
+enum Y {l, b, F, K, g}
+enum u {q, i, x, S, o}
+}
+*******************************************
+contract Z {
+function L(bytes32 Q, uint a, boolean P, int v, boolean F) private  {
+enum z {O, S, R}
+enum d {S, N, Q, y}
+enum D {H, C}
+}
+}
+*******************************************
+contract o {
+enum w {v, h, g, o, w}
+enum t {n, O, e}
+}
+*******************************************
+contract y {
+uint h = ((H(true, Y.k, false, (((2946 * b) * C) * G)) * -1224) * c);
+enum Y {d}
+uint l = s.z;
+}
+*******************************************
+contract j {
+enum c {C, H, o}
+enum k {w, Z, f, p}
+}
+*******************************************
+contract A {
+enum g {a, a}
+enum q {O, O, m}
+enum P {y, l}
+boolean x = V;
+function v(float B, uint U, boolean t, float K, float F) private  {
+enum D {P, W, l, a}
+K = j();
+}
+enum a {c}
+boolean v = r.o;
+enum T {E, q, z}
+}
+*******************************************
+contract x {
+enum W {E, W, e}
+}
+*******************************************
+contract H {
+address X = q;
+enum a {Z, t, h, Q}
+enum D {E, V, E}
+}
+*******************************************

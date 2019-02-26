@@ -301,14 +301,11 @@ def main():
     
     # load from files
     contract_texts = load_contract_texts('contract_texts.txt')
+    contract_parsed = []
     for contract_text in contract_texts:
-        print(reduce(lambda s1, s2: s1 + '\n' + s2 + '\n', contract_text))
-        print(DefineContract.parse_template_from_text(contract_text).convert_to_solidity())
-        
-    contract_codes = load_contract_codes('contract_codes.txt')
-    for contract_code in contract_codes:
-        print(contract_code)
-    
+        contract_parsed.append(DefineContract.parse_template_from_text(contract_text))
+
+    save_contracts_to_files(contract_parsed, 'parsed_contract_texts.txt', 'parsed_contract_codes.txt')
 
 if __name__ == '__main__':
     main()
