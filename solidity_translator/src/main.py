@@ -1,7 +1,8 @@
-from templates import *
-from sample_generator import generate_contract
+from src.templates import *
+from src.sample_generator import generate_contract
+from functools import reduce
 
-def main():
+def manual_test():
 
     # print('constructing...')
     #
@@ -207,38 +208,114 @@ def main():
     # print('\n')
 
 
-    print('constructing...')
-    cn = DefineContract('FOO', [en, dv1, dv2, fn])
-    cn_text = cn.convert_to_text()
-    print(cn.convert_to_text())
-    print(cn.convert_to_solidity())
-    print('\n')
+    # print('constructing...')
+    # cn = DefineContract('FOO', [en, dv1, dv2, fn])
+    # cn_text = cn.convert_to_text()
+    # print(cn.convert_to_text())
+    # print(cn.convert_to_solidity())
+    # print('\n')
+    #
+    # print('parsing...')
+    # cn_text = cn_text.split('\n')
+    # while '' in cn_text:
+    #     cn_text.remove('')
+    # parsed_cn = DefineContract.parse_template_from_text(cn_text)
+    # print(parsed_cn.convert_to_text())
+    # print(parsed_cn.convert_to_solidity())
+    # print('\n')
+    
+    
+def generate_contracts(n_contracts=10):
+    potential_names = 'a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split()
+    
+    potential_names = list(potential_names)
+    contracts = []
+    while len(contracts) < n_contracts:
+        try:
+            used_names = []
+            contract = generate_contract(potential_names, used_names)
+            contracts.append(contract)
+    
+        except (RecursionError, ValueError):
+            pass
+    
+    return contracts
+    
 
-    print('parsing...')
-    cn_text = cn_text.split('\n')
-    while '' in cn_text:
-        cn_text.remove('')
-    parsed_cn = DefineContract.parse_template_from_text(cn_text)
-    print(parsed_cn.convert_to_text())
-    print(parsed_cn.convert_to_solidity())
-    print('\n')
+def save_contracts_to_files(contracts: [DefineContract], text_file_name: str, code_file_name: str):
+    contract_texts = list(map(lambda contract: contract.convert_to_text(), contracts))
+    contract_codes = list(map(lambda contract: contract.convert_to_solidity(), contracts))
+
+    write_items_to_file(contract_texts, text_file_name)
+    write_items_to_file(contract_codes, code_file_name)
+
+
+def write_items_to_file(items, file_name):
+    file = open('../data/' + file_name, 'w')
+    for item in items:
+        file.write(item.strip(''))
+        file.write('*******************************************\n')
+    file.close()
+
+
+def load_contract_texts(text_file_name: str) -> [str]:
+    texts_lines = read_items_from_file(text_file_name)
+    contract_texts = []
+    
+    for text_lines in texts_lines:
+        for i in range(len(text_lines)):
+            text_lines[i] = text_lines[i].strip('\n')
+        contract_texts.append(text_lines)
+            
+    return contract_texts
+
+
+def load_contract_codes(code_file_name: str):
+    codes_lines = read_items_from_file(code_file_name)
+    contract_codes = []
+    
+    for code_lines in codes_lines:
+        contract_codes.append(reduce(lambda s1, s2: s1 + s2, code_lines))
+    return contract_codes
+
+
+def read_items_from_file(file_name: str) -> [[str]]:
+    file = open('../data/' + file_name, 'r')
+    items = []
+    item = []
+    
+    for line in file:
+        if line != '*******************************************\n':
+            item.append(line)
+        else:
+            items.append(item)
+            item = []
+    return items
+    
+
+
+def main():
+    # generate and save new contracts
+    # contracts = generate_contracts(20)
+    # save_contracts_to_files(contracts, 'contract_texts.txt', 'contract_codes.txt')
+    
+    # load from files
+    contract_texts = load_contract_texts('contract_texts.txt')
+    for contract_text in contract_texts:
+        print(reduce(lambda s1, s2: s1 + '\n' + s2 + '\n', contract_text))
+        print(DefineContract.parse_template_from_text(contract_text).convert_to_solidity())
+        
+    contract_codes = load_contract_codes('contract_codes.txt')
+    for contract_code in contract_codes:
+        print(contract_code)
     
 
 if __name__ == '__main__':
-    # potential_names = 'a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split()
-    #
-    # potential_names = list(potential_names)
-    # contracts = []
-    # while len(contracts) < 5:
-    #     try:
-    #         used_names = []
-    #         contract = generate_contract(potential_names, used_names)
-    #         print(contract.convert_to_text())
-    #         print(contract.convert_to_solidity())
-    #         contracts.append(contract)
-    #
-    #     except (RecursionError, ValueError):
-    #         pass
-    #
-    # print('contracts now has a length of ', len(contracts))
     main()
+    
+    # call_text = '[the calling of [g] with argument(s) [[true], [the equal relationship of [7384] and [the equal relationship of [the calling of [Q] with argument(s) [[an enum which is [p] of [L]], [s], [the calling of [X] with argument(s) [[an enum which is [f] of [t]], [an enum which is [P] of [e]]]], [8553]]] and [the equal relationship of [-3025] and [the equal relationship of [m] and [-5554]]]]], [true], [-1896]]]'
+    # parsed_call = Call.parse_expression_from_text(call_text)
+    # # print(parsed_call.convert_to_text())
+    # print(call_text)
+    # print(parsed_call.convert_to_solidity())
+    # print('\n')

@@ -67,7 +67,28 @@ def find_right_part(text: str):
 
 # for strings of format: 'a, b, c' etc.
 def parse_args(text: str):
-    return text.replace(' ', '').split(',')
+    args = []
+    arg = ''
+    cnt = 0
+    for ch in text:
+        if ch == '[':
+            cnt += 1
+            
+        if cnt != 0:
+            arg += ch
+        
+        if ch == ']':
+            cnt -= 1
+            
+        if cnt == 0:
+            args.append(arg)
+            arg = ''
+            
+    while '' in args:
+        args.remove('')
+    
+    return args
+        
 
 def extract_next_template_for_parsing(statements: [str]) -> ([str], [str]):
     if len(statements) == 0:

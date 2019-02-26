@@ -1,4 +1,4 @@
-from expressions import *
+from src.expressions import *
 
 class Template:
     def __init__(self):
@@ -181,7 +181,7 @@ class DefineFor(Template):
         for component in self.components:
             text += component.convert_to_text() + '\n'
 
-        text += 'This is the end of the description of the for loop\n'
+        text += 'This is the end of the description of the for loop'
         return text
 
     def convert_to_solidity(self):
@@ -241,7 +241,7 @@ class DefineIfElse(Template):
         text += 'False Statements: \n'
         for false_stm in self.false_stms:
             text += false_stm.convert_to_text() + '\n'
-        text += 'This is the end of the description of the if else block\n'
+        text += 'This is the end of the description of the if else block'
         return text
 
     def convert_to_solidity(self):
@@ -309,7 +309,7 @@ class DefineFunction(Template):
         text += (('This ' + self.context) if self.context is not None else 'It') + ' has a ' + options_str + 'function called ' + self.name + ((' with parameters: ' + params_str) if self.params is not None else '' ) + '\n'
         for component in self.components:
             text += component.convert_to_text() + '\n'
-        text += 'This is the end of the description of the function ' + self.name + '\n'
+        text += 'This is the end of the description of the function ' + self.name
 
         return text
 

@@ -1,5 +1,5 @@
 import random
-from templates import *
+from src.templates import *
 
 NUM_POSSIBLE_CONTRACT_COMPONENTS = 3
 NUM_POSSIBLE_FUNC_COMPONENTS = 4

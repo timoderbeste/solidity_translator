@@ -1,4 +1,4 @@
-from utils import *
+from src.utils import *
 
 class Expression:
     def __init__(self):
@@ -262,7 +262,7 @@ class Enum(Expression):
 
 
 class Call(Expression):
-    def __init__(self, name: str, args: [Variable]):
+    def __init__(self, name: str, args: [Expression]):
         Expression.__init__(self)
         self.name = name
         self.args = args
@@ -296,7 +296,7 @@ class Call(Expression):
             args = []
         else:
             args = parse_args(right_part[1:-1])
-            args = list(map(lambda n: Variable(n[1:-1]), args))
+            args = list(map(lambda n: Expression.parse_expression_from_text(n), args))
         return Call(name, args)
 
 
