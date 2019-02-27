@@ -1,0 +1,6 @@
+contract Foo {
+	function foo(float a, float b) public  {
+		float c = (a + b);
+	}
+}
+*******************************************

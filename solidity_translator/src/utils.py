@@ -1,3 +1,5 @@
+from functools import reduce
+
 def is_number(text):
     text = text[1:-1]
     try:
@@ -149,6 +151,27 @@ def extract_function_template_for_parsing(statements: [str]) -> ([str], [str]):
             break
 
     return function_template_statements, statements[len(function_template_statements):]
+
+
+def beautify_contract_codes(contract_code: str) -> str:
+    contract_code_lines = contract_code.split('\n')
+    contract_code_lines.remove('')
+    indent = ''
+    for i in range(len(contract_code_lines)):
+
+        if contract_code_lines[i] == '}':
+            indent = indent[0: len(indent) - 1]
+            contract_code_lines[i] = indent + contract_code_lines[i]
+        else:
+            contract_code_lines[i] = indent + contract_code_lines[i]
+            if contract_code_lines[i].endswith('{'):
+                indent = indent + '\t'
+
+        contract_code_lines[i] = contract_code_lines[i] + '\n'
+    return reduce(lambda s1, s2: s1 + s2, contract_code_lines)
+
+
+
 
 
 # testing code
