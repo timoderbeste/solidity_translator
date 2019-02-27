@@ -7,48 +7,47 @@ from src.utils import beautify_contract_codes
 
 POTENTIAL_NAMES = list('a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split())
 MAX_LINE_LEN = 500
-# def generate_contracts(n_contracts=10):
-#     contracts = []
-#     while len(contracts) < n_contracts:
-#         try:
-#             used_names = []
-#             contract = generate_contract(POTENTIAL_NAMES, used_names)
-#             contracts.append(contract)
-#
-#         except (RecursionError, ValueError):
-#             pass
-#
-#     return contracts
+PRINT_EVERY = 10000
 
 
-def generate_samples(n_samples: int = 10, sample_names=[]):
+def generate_samples(n_samples: int = 10, sample_names=None):
+    if sample_names is None:
+        sample_names = []
     samples = []
-    while len(samples) < n_samples:
-        sample_name = sample_names[random.randint(0, len(sample_names) - 1)]
-        try:
-            if sample_name == 'contract':
-                used_names = []
-                samples.append(generate_contract(POTENTIAL_NAMES, used_names))
-            elif sample_name == 'require':
-                used_names = []
-                samples.append(generate_require(None, POTENTIAL_NAMES, used_names))
-            elif sample_name == 'emit':
-                used_names = []
-                samples.append(generate_emit(POTENTIAL_NAMES, used_names))
-            elif sample_name == 'enum':
-                used_names = []
-                samples.append(generate_enum(None, POTENTIAL_NAMES, used_names))
-            elif sample_name == 'variable':
-                used_names = []
-                samples.append(generate_variable(None, POTENTIAL_NAMES, False, used_names))
+    try:
+        while len(samples) < n_samples:
+            sample_name = sample_names[random.randint(0, len(sample_names) - 1)]
+            try:
+                if sample_name == 'contract':
+                    used_names = []
+                    samples.append(generate_contract(POTENTIAL_NAMES, used_names))
+                elif sample_name == 'require':
+                    used_names = []
+                    samples.append(generate_require(None, POTENTIAL_NAMES, used_names))
+                elif sample_name == 'emit':
+                    used_names = []
+                    samples.append(generate_emit(POTENTIAL_NAMES, used_names))
+                elif sample_name == 'enum':
+                    used_names = []
+                    samples.append(generate_enum(None, POTENTIAL_NAMES, used_names))
+                elif sample_name == 'variable':
+                    used_names = []
+                    samples.append(generate_variable(None, POTENTIAL_NAMES, False, used_names))
 
-            last_sample = samples[len(samples) - 1]
-            last_sample_lines = last_sample.convert_to_text().split('\n')
-            for line in last_sample_lines:
-                if len(line) > MAX_LINE_LEN:
-                    samples = samples[:-1]
-        except (RecursionError, ValueError):
-            pass
+                last_sample = samples[len(samples) - 1]
+                last_sample_lines = last_sample.convert_to_text().split('\n')
+                for line in last_sample_lines:
+                    if len(line) > MAX_LINE_LEN:
+                        samples = samples[:-1]
+            except (RecursionError, ValueError):
+                pass
+
+            if len(samples) % PRINT_EVERY == 0:
+                print(len(samples), 'generated')
+    except (SystemExit, KeyboardInterrupt):
+        print('\nEnding by user...')
+        print('Saving the current generated samples')
+        return samples
 
     return samples
 
