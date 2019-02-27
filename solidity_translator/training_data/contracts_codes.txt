@@ -1,0 +1,58 @@
+contract U {
+	address C = W(-2092);
+	boolean v = false;
+	require((-9183 == ((((J * Y) * z) * w) == (o.M == b(S(), -1704, false, (f * N), T(w.i, W))))));
+}
+*******************************************
+contract A {
+	address X = N;
+}
+*******************************************
+contract p {
+	require((a(w.W, m) == D));
+}
+*******************************************
+contract m {
+	require((t == H));
+}
+*******************************************
+contract p {
+	double q = U(w.T);
+	require((j.R == (a(false, -7515) * I)));
+	enum U {F, Y}
+}
+*******************************************
+contract P {
+	function B(P, float m, float y, double W, boolean V) public  {
+		require(((false == r) == true));
+		enum a {d, P}
+		P = a(6383, l, -7384, j);
+		emit f((true == M), 2083, B, (R == p.A))
+	}
+	emit ((true == e) == true)
+}
+*******************************************
+contract m {
+	require((false == -601));
+	enum c {x}
+	enum R {g, Q}
+	enum s {v, X, I, H}
+	emit n(-9273)
+	enum B {p, p, U, D, A}
+}
+*******************************************
+contract s {
+	emit h
+	emit false
+	enum S {r, R}
+}
+*******************************************
+contract S {
+	emit p.J
+}
+*******************************************
+contract x {
+	require(((-2108 == V) == o.W));
+	enum v {j}
+}
+*******************************************

@@ -16,6 +16,8 @@ def write_items_to_file(items, file_name, path_name='../data/'):
     file = open(path_name + file_name, 'w')
     for item in items:
         file.write(item.strip(''))
+        if item[len(item) - 1] != '\n':
+            file.write('\n')
         file.write('*******************************************\n')
     file.close()
 

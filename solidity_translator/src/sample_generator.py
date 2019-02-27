@@ -1,8 +1,8 @@
 import random
 from src.templates import *
 
-NUM_POSSIBLE_CONTRACT_COMPONENTS = 3
-NUM_POSSIBLE_FUNC_COMPONENTS = 4
+NUM_POSSIBLE_CONTRACT_COMPONENTS = 5
+NUM_POSSIBLE_FUNC_COMPONENTS = 6
 NUM_POSSIBLE_EXPS = 7
 
 MAX_NUM_ENUM_ELEMS = 5
@@ -43,8 +43,22 @@ def generate_contract(potential_names: [str], used_names: [str]=None):
             components.append(generate_variable('contract', potential_names, used_names=used_names))
         elif component_type == 2:
             components.append(generate_function('contract', potential_names, used_names=used_names))
+        elif component_type == 3:
+            components.append(generate_require('contract', potential_names, used_names))
+        elif component_type == 4:
+            components.append(generate_emit(potential_names, used_names))
 
     return DefineContract(name, components)
+
+def generate_require(context: str, potential_names: [str], used_names=None):
+    boolean_operation = generate_equal_exp(potential_names, used_names)
+    return Require(context, boolean_operation)
+
+
+def generate_emit(potential_names: [str], used_names=None):
+    exp = generate_expression(potential_names, False, used_names)
+    return Emit(exp)
+
 
 def generate_enum(context: str, potential_names: [str], used_names=None):
     unused_names = get_unused_names(potential_names, used_names=used_names)
@@ -77,7 +91,7 @@ def generate_function(context: str, potential_names: [str], used_names=None):
     components = get_func_components('function', potential_names, used_names=used_names)
     return DefineFunction(context, name, options, params, components)
 
-def generate_if_else(context, potential_names, used_names=None):
+def generate_if_else(potential_names, used_names=None):
     bool_cond = generate_equal_exp(potential_names)
     true_stms = get_func_components('if-else-true-statements', potential_names, used_names=used_names)
     false_stms = get_func_components('if-else-false-statements', potential_names, used_names=used_names)
@@ -162,7 +176,11 @@ def get_func_components(context, potential_names, used_names=None):
         elif component_type == 1:
             components.append(generate_variable(context, potential_names, used_names=used_names))
         elif component_type == 2:
-            components.append(generate_if_else(context, potential_names, used_names=used_names))
+            components.append(generate_if_else(potential_names, used_names=used_names))
         elif component_type == 3:
             components.append(generate_for_loop(context, potential_names, used_names=used_names))
+        elif component_type == 4:
+            components.append(generate_require(context, potential_names, used_names))
+        elif component_type == 5:
+            components.append(generate_emit(potential_names, used_names))
     return components

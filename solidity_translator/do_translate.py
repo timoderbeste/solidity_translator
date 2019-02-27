@@ -1,4 +1,5 @@
 import sys
+
 from src.contract_loader_saver import *
 
 
@@ -6,7 +7,7 @@ def main():
     if len(sys.argv) != 3:
         print('Please first give the name of the file containing the text to be translated and then'
               'the name of the file where the output should be.')
-        print('python main.py source_file_name target_file_name')
+        print('python do_translate.py source_file_name target_file_name')
         return
     source_file_name = sys.argv[1]
     target_file_name = sys.argv[2]

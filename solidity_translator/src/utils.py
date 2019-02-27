@@ -155,7 +155,8 @@ def extract_function_template_for_parsing(statements: [str]) -> ([str], [str]):
 
 def beautify_contract_codes(contract_code: str) -> str:
     contract_code_lines = contract_code.split('\n')
-    contract_code_lines.remove('')
+    while '' in contract_code_lines:
+        contract_code_lines.remove('')
     indent = ''
     for i in range(len(contract_code_lines)):
 

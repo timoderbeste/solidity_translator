@@ -1,4 +1,5 @@
 The following defines the contract Foo
+This contract has an enum called p that has E, J, v
 This contract has a public function called foo with parameters: It has a float variable called a, It has a float variable called b
 This contract has a float variable called c with an assigned value [the addition of [a] and [b]]
 This is the end of the description of the function foo
