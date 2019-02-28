@@ -1,12 +1,11 @@
 import sys
-import random
 
 from src.sample_generator import *
-from src.contract_loader_saver import write_items_to_file
-from src.utils import beautify_contract_codes
+from src.utils.contract_loader_saver import write_items_to_file
+from src.utils.general_utils import beautify_contract_codes
 
 POTENTIAL_NAMES = list('a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split())
-MAX_LINE_LEN = 500
+MAX_LINE_LEN = 300
 PRINT_EVERY = 10000
 
 
@@ -42,7 +41,7 @@ def generate_samples(n_samples: int = 10, sample_names=None):
             except (RecursionError, ValueError):
                 pass
 
-            if len(samples) % PRINT_EVERY == 0:
+            if len(samples) % PRINT_EVERY == 0 and len(samples) != 0:
                 print(len(samples), 'generated')
     except (SystemExit, KeyboardInterrupt):
         print('\nEnding by user...')

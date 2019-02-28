@@ -1,7 +1,0 @@
-contract Foo {
-	enum p {E, J, v}
-	function foo(float a, float b) public  {
-		float c = (a + b);
-	}
-}
-*******************************************

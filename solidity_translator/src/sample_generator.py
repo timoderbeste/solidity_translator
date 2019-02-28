@@ -1,5 +1,5 @@
 import random
-from src.templates import *
+from src.language_rules.templates import *
 
 NUM_POSSIBLE_CONTRACT_COMPONENTS = 5
 NUM_POSSIBLE_FUNC_COMPONENTS = 6

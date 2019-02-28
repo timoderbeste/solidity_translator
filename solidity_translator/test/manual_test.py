@@ -1,6 +1,6 @@
-from src.templates import *
+from src.language_rules.templates import *
 from src.sample_generator import generate_contract
-from src.contract_loader_saver import *
+from src.utils.contract_loader_saver import *
 def manual_test():
 
     # print('constructing...')

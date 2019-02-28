@@ -1,6 +1,6 @@
 from functools import reduce
-from src.templates import DefineContract
-from src.utils import beautify_contract_codes
+from src.language_rules.templates import DefineContract
+from src.utils.general_utils import beautify_contract_codes
 
 def save_contracts_to_files(contracts: [DefineContract], text_file_name: str = None, code_file_name: str = None):
     contract_texts = list(map(lambda contract: contract.convert_to_text(), contracts))

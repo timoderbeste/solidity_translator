@@ -1,6 +1,6 @@
 import unittest
-from src.contract_loader_saver import load_contract_texts, load_contract_codes
-from src.templates import DefineContract
+from src.utils.contract_loader_saver import load_contract_texts, load_contract_codes
+from src.language_rules.templates import DefineContract
 
 
 class TestParsingMethods(unittest.TestCase):

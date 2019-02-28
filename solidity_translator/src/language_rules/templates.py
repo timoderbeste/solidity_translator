@@ -1,4 +1,4 @@
-from src.expressions import *
+from src.language_rules.expressions import *
 
 class Template:
     def __init__(self):

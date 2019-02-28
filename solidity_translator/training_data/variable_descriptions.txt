@@ -1,0 +1,20 @@
+It has a boolean variable called K with an assigned value [an enum which is [H] of [N]]
+*******************************************
+It has a uint variable called p with an assigned value [3333]
+*******************************************
+It has a float variable called U with an assigned value [h]
+*******************************************
+It has a uint variable called J with an assigned value [j]
+*******************************************
+It has a int variable called b with an assigned value [false]
+*******************************************
+It has a bytes32 variable called T with an assigned value [z]
+*******************************************
+It has a int variable called m with an assigned value [h]
+*******************************************
+It has a float variable called l with an assigned value [true]
+*******************************************
+It has a bytes32 variable called p with an assigned value [an enum which is [i] of [q]]
+*******************************************
+It has a boolean variable called j with an assigned value [411]
+*******************************************
