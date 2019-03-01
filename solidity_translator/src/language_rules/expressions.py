@@ -35,6 +35,32 @@ class Expression:
         else:
             return Variable.parse_expression_from_text(text)
 
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        vocab = []
+        vocab.extend(Variable.get_description_vocab())
+        vocab.extend(Number.get_description_vocab())
+        vocab.extend(Boolean.get_description_vocab())
+        vocab.extend(NumberOperation.get_description_vocab())
+        vocab.extend(BooleanOperation.get_description_vocab())
+        vocab.extend(Enum.get_description_vocab())
+        vocab.extend(Call.get_description_vocab())
+
+        return vocab
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        vocab = []
+        vocab.extend(Variable.get_solidity_vocab())
+        vocab.extend(Number.get_solidity_vocab())
+        vocab.extend(Boolean.get_solidity_vocab())
+        vocab.extend(NumberOperation.get_solidity_vocab())
+        vocab.extend(BooleanOperation.get_solidity_vocab())
+        vocab.extend(Enum.get_solidity_vocab())
+        vocab.extend(Call.get_solidity_vocab())
+
+        return vocab
+
 
 class Variable(Expression):
     def __init__(self, var_name):
@@ -51,6 +77,14 @@ class Variable(Expression):
     def parse_expression_from_text(text):
         return Variable(text[1:-1])
 
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return []
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return []
+
 
 class Number(Expression):
     def __init__(self, number):
@@ -66,6 +100,14 @@ class Number(Expression):
     @staticmethod
     def parse_expression_from_text(text):
         return Number(text[1:-1])
+
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return []
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return []
 
 
 class Boolean(Expression):
@@ -89,6 +131,14 @@ class Boolean(Expression):
     def parse_expression_from_text(text):
         return Boolean(True) if text == '[true]' else Boolean(False)
 
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return ['true', 'false']
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return ['true', 'false']
+
 
 class NumberOperation(Expression):
     def __init__(self):
@@ -103,6 +153,24 @@ class NumberOperation(Expression):
     @staticmethod
     def parse_expression_from_text(text):
         pass
+
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        vocab = []
+        vocab.extend(Multiply.get_description_vocab())
+        vocab.extend(Add.get_description_vocab())
+        vocab.extend(Divide.get_description_vocab())
+
+        return vocab
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        vocab = []
+        vocab.extend(Multiply.get_solidity_vocab())
+        vocab.extend(Add.get_solidity_vocab())
+        vocab.extend(Divide.get_solidity_vocab())
+
+        return vocab
 
 
 class Multiply(NumberOperation):
@@ -124,6 +192,14 @@ class Multiply(NumberOperation):
 
         return Multiply(Expression.parse_expression_from_text(left_part), Expression.parse_expression_from_text(right_part))
 
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return ['the', 'product', 'of', 'and']
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return ['*']
+
 
 class Add(NumberOperation):
     def __init__(self, expression1: Expression, expression2: Expression):
@@ -144,6 +220,14 @@ class Add(NumberOperation):
         return Add(Expression.parse_expression_from_text(left_part),
                         Expression.parse_expression_from_text(right_part))
 
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return ['the', 'addition', 'of', 'and']
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return ['+']
+
 
 class Divide(NumberOperation):
     def __init__(self, divider: Expression, divident: Expression):
@@ -163,6 +247,14 @@ class Divide(NumberOperation):
         right_part = find_right_part(text)
         return Divide(Expression.parse_expression_from_text(left_part),
                         Expression.parse_expression_from_text(right_part))
+
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return ['the', 'division', 'of', 'from']
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return ['/']
 
 
 class BooleanOperation(Expression):
@@ -186,6 +278,24 @@ class BooleanOperation(Expression):
 
         return None
 
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        vocab = []
+        vocab.extend(Equal.get_description_vocab())
+        vocab.extend(LargerEqual.get_description_vocab())
+        vocab.extend(Larger.get_description_vocab())
+
+        return vocab
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        vocab = []
+        vocab.extend(Equal.get_solidity_vocab())
+        vocab.extend(LargerEqual.get_solidity_vocab())
+        vocab.extend(Larger.get_solidity_vocab())
+
+        return vocab
+
 
 class Equal(BooleanOperation):
     def __init__(self, e1: Expression, e2: Expression):
@@ -205,6 +315,15 @@ class Equal(BooleanOperation):
         right_part = find_right_part(text)
         return Equal(Expression.parse_expression_from_text(left_part), Expression.parse_expression_from_text(right_part))
 
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return ['the', 'equal', 'relationship', 'of', 'and']
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return ['==']
+
+
 class LargerEqual(BooleanOperation):
     def __init__(self, e1: Expression, e2: Expression):
         BooleanOperation.__init__(self)
@@ -222,6 +341,15 @@ class LargerEqual(BooleanOperation):
         left_part = find_left_part(text)
         right_part = find_right_part(text)
         return LargerEqual(Expression.parse_expression_from_text(left_part), Expression.parse_expression_from_text(right_part))
+
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return ['the', 'larger', 'or', 'equal', 'relationship', 'of', 'and']
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return ['>=']
+
 
 class Larger(BooleanOperation):
     def __init__(self, e1: Expression, e2: Expression):
@@ -241,6 +369,14 @@ class Larger(BooleanOperation):
         right_part = find_right_part(text)
         return Larger(Expression.parse_expression_from_text(left_part), Expression.parse_expression_from_text(right_part))
 
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return ['the', 'larger', 'relationship', 'of', 'and']
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return ['>']
+
 
 class Enum(Expression):
     def __init__(self, enum_name: str, component_name: str):
@@ -259,6 +395,14 @@ class Enum(Expression):
         left_part = find_left_part(text)
         right_part = find_right_part(text)
         return Enum(right_part[1:-1], left_part[1:-1])
+
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return ['an', 'enum', 'which', 'is', 'of']
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return []
 
 
 class Call(Expression):
@@ -298,6 +442,14 @@ class Call(Expression):
             args = parse_args(right_part[1:-1])
             args = list(map(lambda n: Expression.parse_expression_from_text(n), args))
         return Call(name, args)
+
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return ['the', 'calling', 'of', 'with', 'argument(s)']
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return []
 
 
 if __name__ == '__main__':

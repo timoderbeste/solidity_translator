@@ -30,6 +30,28 @@ class Template:
             else:
                 return DefineFunction.parse_template_from_text(text)
 
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return Require.get_description_vocab() +\
+               Emit.get_description_vocab() +\
+               DefineEnum.get_description_vocab() +\
+               DefineVariable.get_description_vocab() +\
+               DefineFor.get_description_vocab() +\
+               DefineIfElse.get_description_vocab() +\
+               DefineFunction.get_description_vocab() +\
+               DefineContract.get_description_vocab()
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return Require.get_solidity_vocab() +\
+               Emit.get_solidity_vocab() +\
+               DefineEnum.get_solidity_vocab() +\
+               DefineVariable.get_solidity_vocab() +\
+               DefineFor.get_solidity_vocab() +\
+               DefineIfElse.get_solidity_vocab() +\
+               DefineFunction.get_solidity_vocab() +\
+               DefineContract.get_solidity_vocab()
+
 
 class Require(Template):
     def __init__(self, context, boe: BooleanOperation):
@@ -48,6 +70,14 @@ class Require(Template):
         text = text[0]
         return Require(None, Expression.parse_expression_from_text(text[text.find('checks') + len('checks') + 1:]))
 
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return ['this', 'it', 'checks']
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return ['require']
+
 
 class Emit(Template):
     def __init__(self, e: Expression):
@@ -65,6 +95,14 @@ class Emit(Template):
         text = text[0]
         exp_text = text[len('It emits the following: '):]
         return Emit(Expression.parse_expression_from_text(exp_text))
+
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return ['it', 'emits', 'the', 'following']
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return ['emit']
 
 
 class DefineEnum(Template):
@@ -99,6 +137,14 @@ class DefineEnum(Template):
         name = text[text.find('an enum called') + len('an enum called '):text.find(' that has')]
         elems = text[text.find(' that has ') + len(' that has '):].replace(' ', '').split(',')
         return DefineEnum(None, name, elems)
+
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return ['this', 'it', 'has', 'an', 'enum', 'called', 'that', 'has']
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return ['enum']
 
 
 class DefineVariable(Template):
@@ -162,6 +208,14 @@ class DefineVariable(Template):
             value_text = text
             return DefineVariable(None, None, None, Call.parse_expression_from_text(value_text))
 
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return ['this', 'it', 'has', 'a', 'variable', 'called', 'with', 'an', 'assigned', 'value', 'is', 'a']
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return ['=']
+
 
 class DefineFor(Template):
     def __init__(self, var: DefineVariable, bool_cond: BooleanOperation, increment: DefineVariable, components: [Template]):
@@ -220,6 +274,16 @@ class DefineFor(Template):
 
         components = extract_component_templates(component_statements)
         return DefineFor(var, bool_cond, increment, components)
+
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return ['there', 'is', 'a', 'for', 'loop', 'as', 'follows', 'the', 'condition', 'is', 'the', 'incrementing',
+                'part', 'is', 'it', 'has', 'the', 'following', 'components', 'this', 'is', 'the', 'end', 'of', 'the',
+                'description', 'of', 'the', 'for', 'loop']
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return ['for']
 
     
 
@@ -280,6 +344,15 @@ class DefineIfElse(Template):
         false_stms = extract_component_templates(false_statements)
 
         return DefineIfElse(bool_cond, true_stms, false_stms)
+
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return 'there is an if else block defined as follows'.split(' ') + ['condition', 'true', 'false', 'statements']\
+               + 'this is the end of the description of the if else block'.split(' ')
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return ['if', 'else']
 
 
 class DefineFunction(Template):
@@ -356,6 +429,14 @@ class DefineFunction(Template):
 
         return DefineFunction(None, name, options, params, components)
 
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return ['this', 'it', 'has', 'a', 'function', 'called', 'with', 'parameters', 'this', 'is', 'the',
+                'end', 'of', 'the', 'description', 'of', 'the', 'function']
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return ['function']
 
 
 class DefineContract(Template):
@@ -399,6 +480,14 @@ class DefineContract(Template):
         components = extract_component_templates(component_statements)
         return DefineContract(name, components)
 
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return 'the following defines the contract'.split(' ') +\
+               'this is the end of the description of the contract'.split(' ')
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return ['contract']
 
 
 def extract_component_templates(statements: [str]) -> [Template]:

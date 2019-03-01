@@ -12,6 +12,10 @@ import math, copy, time
 from torch.autograd import Variable
 
 
+from src.language_rules.expressions import Expression
+from src.language_rules.templates import Template
+
+
 # A list of todos.
 # TODO define the vocab as well as the embedding for the restricted natural language
 # TODO define the vocab as well as the embedding for the solidity code
@@ -49,9 +53,9 @@ class Generator(nn.Module):
     """
     Define standard linear + softmax generation step.
     """
-    def __init__(self, d_model, vocab):
+    def __init__(self, d_model, vocab_size):
         super(Generator, self).__init__()
-        self.proj = nn.Linear(d_model, vocab)
+        self.proj = nn.Linear(d_model, vocab_size)
 
     def forward(self, x):
         return F.log_softmax(self.proj(x), dim=-1)
@@ -253,9 +257,9 @@ class PositionwiseFeedForward(nn.Module):
 
 
 class Embeddings(nn.Module):
-    def __init__(self, d_model, vocab):
+    def __init__(self, d_model, vocab_size):
         super(Embeddings, self).__init__()
-        self.lut = nn.Embedding(vocab, d_model)
+        self.lut = nn.Embedding(vocab_size, d_model)
         self.d_model = d_model
 
     def forward(self, x):
@@ -282,12 +286,14 @@ class PositionalEncoding(nn.Module):
         self.register_buffer('pe', pe)
     
     def forward(self, x):
+        # The size of the encoding table is 5000 by default, which is fixed.
+        # Depending on how long x is, the encoding's length may vary.
         x = x + Variable(self.pe[:, :x.size(1)],
                          requires_grad=False)
         return self.dropout(x)
 
 
-def make_transformer_model(src_vocab, tgt_vocab, N=6,
+def make_transformer_model(src_vocab_size, tgt_vocab_size, N=6,
                d_model=512, d_ff=2048, h=8, dropout=0.1):
     """
     Helper: Construct a model from hyperparameters.
@@ -297,12 +303,13 @@ def make_transformer_model(src_vocab, tgt_vocab, N=6,
     ff = PositionwiseFeedForward(d_model, d_ff, dropout)
     position = PositionalEncoding(d_model, dropout)
     model = EncoderDecoder(
-        Encoder(EncoderLayer(d_model, c(attn), c(ff), dropout), N),
-        Decoder(DecoderLayer(d_model, c(attn), c(attn),
-                             c(ff), dropout), N),
-        nn.Sequential(Embeddings(d_model, src_vocab), c(position)),
-        nn.Sequential(Embeddings(d_model, tgt_vocab), c(position)),
-        Generator(d_model, tgt_vocab))
+        Encoder(EncoderLayer(d_model, c(attn), c(ff), dropout),
+                N),
+        Decoder(DecoderLayer(d_model, c(attn), c(attn), c(ff), dropout),
+                N),
+        nn.Sequential(Embeddings(d_model, src_vocab_size), c(position)),
+        nn.Sequential(Embeddings(d_model, tgt_vocab_size), c(position)),
+        Generator(d_model, tgt_vocab_size))
     
     # This was important from their code.
     # Initialize parameters with Glorot / fan_avg.
@@ -445,3 +452,178 @@ class LabelSmoothing(nn.Module):
         return self.criterion(x, Variable(true_dist, requires_grad=False))
     
 
+class Vocab:
+    def __init__(self, vocab: [str]):
+        self.vocab = vocab
+        self.word2index = {}
+        self.index2word = {}
+
+        cnt = 0
+        for word in self.vocab:
+           self.word2index[word] = cnt
+           self.index2word[cnt] = word
+           cnt += 1
+
+    def index_of_word(self, word: str):
+        return self.word2index[word]
+
+    def word_at_index(self, index: int):
+        return self.index2word[index]
+
+# Transformer translation only supports integer for now.
+def get_description_vocab(allowed_variable_names: [str], syntax_tokens, number_range: (int, int)) -> [str]:
+    vocab = []
+    vocab.extend(['unk_tkn', 'pad_tkn', '[', ']', 'contract', 'function', 'for', ':', ',', '.'])
+    vocab.extend(allowed_variable_names)
+    vocab.extend(Expression.get_description_vocab())
+    vocab.extend(Template.get_description_vocab())
+    vocab.extend(syntax_tokens)
+
+    assert number_range[0] < number_range[1]
+    vocab.extend(list(map(lambda n: str(n), np.arange(number_range[0], number_range[1]))))
+    return Vocab(list(set(vocab)))
+
+
+
+def get_solidity_vocab(allowed_variable_names: [str], syntax_tokens, number_range: (int, int)) -> [str]:
+    vocab = []
+    vocab.extend(['unk_tkn', 'pad_tkn', '[', ']', '(', ')', '{', '}', ';', '.', ','])
+    vocab.extend(allowed_variable_names)
+    vocab.extend(Expression.get_solidity_vocab())
+    vocab.extend(Template.get_solidity_vocab())
+    vocab.extend(syntax_tokens)
+
+    assert number_range[0] < number_range[1]
+    vocab.extend(list(map(lambda n: str(n), np.arange(number_range[0], number_range[1]))))
+    return Vocab(list(set(vocab)))
+
+
+# A list of example descriptions to refer to...
+# The following defines the contract Q
+# It emits the following: [9517]
+# This is the end of the description of the contract Q
+# *******************************************
+# The following defines the contract W
+# It emits the following: [true]
+# This is the end of the description of the contract W
+# *******************************************
+# The following defines the contract u
+# This contract has an enum called h that has Z, C, N, r
+# This contract has a bytes32 variable called y with an assigned value [the calling of [W] with argument(s) [[the product of [k] and [-1990]]]]
+# This contract checks [the equal relationship of [the calling of [t] with argument(s) [[the equal relationship of [an enum which is [D] of [J]] and [154]], [8167], [the calling of [A] with argument(s) [[false]]], [an enum which is [F] of [O]], [an enum which is [t] of [z]]]] and [true]]
+# It emits the following: [8718]
+# This contract has an enum called U that has S, X
+# This is the end of the description of the contract u
+def tokenize_description(text: str) -> [str]:
+    # add space to ':', '[', ']', ',', '.'
+    text = text\
+        .replace(':', ' :')\
+        .replace('[', '[ ')\
+        .replace(']', ' ]')\
+        .replace(',', ' ,')\
+        .replace('.', ' . ')
+
+    return list(map(lambda s: s.strip(' '), text.lower().split(' ')))
+
+
+# A list of example codes are given below to refer to...
+# contract u {
+# 	enum h {Z, C, N, r}
+# 	bytes32 y = W((k * -1990));
+# 	require((t((J.D == 154), 8167, A(false), O.F, z.t) == true));
+# 	emit 8718
+# 	enum U {S, X}
+# }
+# *******************************************
+# contract J {
+# 	require(((-3568 * v(-6701, 3681, A.s)) == 1995));
+# 	address u = D.g;
+# 	emit true
+# 	enum j {U}
+# 	require((C.t == 281));
+# }
+# *******************************************
+# contract Q {
+# 	enum i {u, B, b}
+# 	emit (-9078 * v)
+# 	function a(int s, float A, uint W, address Y, boolean e) public  {
+# 		require((g.I == E(true, (P == I.p))));
+# 	}
+# }
+def tokenize_solidity_code(text: str) -> [str]:
+    text = text\
+        .replace('{', ' { ')\
+        .replace('}', ' } ')\
+        .replace('(', ' ( ')\
+        .replace(')', ' ) ')\
+        .replace('.', ' . ')\
+        .replace(';', ' ; ')\
+        .replace(',', ' , ')
+    tokens = list(map(lambda s: s.strip(' '), text.lower().split(' ')))
+    while '' in tokens:
+        tokens.remove('')
+
+    return tokens
+
+
+def convert_text_to_indices(text: str):
+    # note the case where a token may not appear in the vocab - use unk_tkn!
+    pass
+
+
+
+VAR_OPTIONS_SET = [
+    'uint',
+    'int',
+    'double',
+    'float',
+    'address',
+    'bytes32',
+    'boolean',
+]
+
+FUNC_OPTIONS_SET = [
+    'public',
+    'private',
+]
+
+
+def test_tokenizers():
+    descriptions = ['This contract has a bytes32 variable called y with an assigned value [the calling of [W] with argument(s) [[the product of [k] and [-1990]]]]',
+         'This contract checks [the equal relationship of [the calling of [t] with argument(s) [[the equal relationship of [an enum which is [D] of [J]] and [154]], [8167], [the calling of [A] with argument(s) [[false]]], [an enum which is [F] of [O]], [an enum which is [t] of [z]]]] and [true]]']
+    tokens = tokenize_description(descriptions[0]) + tokenize_description(descriptions[1])
+
+    allowed_variable_names = 'a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split()
+    number_range = (-10000, 10000)
+    description_vocab = get_description_vocab(allowed_variable_names, VAR_OPTIONS_SET + FUNC_OPTIONS_SET, number_range)
+    solidity_vocab = get_solidity_vocab(allowed_variable_names, VAR_OPTIONS_SET + FUNC_OPTIONS_SET, number_range)
+
+    for token in tokens:
+        if token not in description_vocab.vocab:
+            print('This token is not in the description_vocab!', token)
+
+    codes = [
+        'require((t((J.D == 154), 8167, A(false), O.F, z.t) == true));',
+        'bytes32 y = W((k * -1990));',
+        'function a(int s, float A, uint W, address Y, boolean e) public {',
+    ]
+    tokens = tokenize_solidity_code(codes[0]) + tokenize_solidity_code(codes[1]) + tokenize_solidity_code(codes[2])
+
+    for token in tokens:
+        if token not in solidity_vocab.vocab:
+            print('This token is not in the solidity_vocab!', token)
+
+
+def main():
+    allowed_variable_names = 'a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split()
+    number_range = (-10000, 10000)
+
+    description_vocab = get_description_vocab(allowed_variable_names, VAR_OPTIONS_SET + FUNC_OPTIONS_SET, number_range)
+    solidity_vocab = get_solidity_vocab(allowed_variable_names, VAR_OPTIONS_SET + FUNC_OPTIONS_SET, number_range)
+
+
+
+
+if __name__ == '__main__':
+    # main()
+    test_tokenizers()
