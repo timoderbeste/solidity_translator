@@ -14,6 +14,7 @@ from torch.autograd import Variable
 
 from src.language_rules.expressions import Expression
 from src.language_rules.templates import Template
+from src.utils.sample_loader_saver import load_sample_codes, load_sample_texts
 
 
 # A list of todos.
@@ -26,7 +27,7 @@ class EncoderDecoder(nn.Module):
     A standard Encoder-Decoder architecture. Base for this and many
     other models.
     """
-    
+
     def __init__(self, encoder, decoder, src_embed, tgt_embed, generator):
         super(EncoderDecoder, self).__init__()
         self.encoder = encoder
@@ -34,64 +35,51 @@ class EncoderDecoder(nn.Module):
         self.src_embed = src_embed
         self.tgt_embed = tgt_embed
         self.generator = generator
-    
+
     def forward(self, src, tgt, src_mask, tgt_mask):
-        """
-        Take in and process masked src and target sequences.
-        """
+        "Take in and process masked src and target sequences."
         return self.decode(self.encode(src, src_mask), src_mask,
                            tgt, tgt_mask)
-    
+
     def encode(self, src, src_mask):
         return self.encoder(self.src_embed(src), src_mask)
-    
+
     def decode(self, memory, src_mask, tgt, tgt_mask):
         return self.decoder(self.tgt_embed(tgt), memory, src_mask, tgt_mask)
     
     
 class Generator(nn.Module):
-    """
-    Define standard linear + softmax generation step.
-    """
-    def __init__(self, d_model, vocab_size):
+    "Define standard linear + softmax generation step."
+    def __init__(self, d_model, vocab):
         super(Generator, self).__init__()
-        self.proj = nn.Linear(d_model, vocab_size)
+        self.proj = nn.Linear(d_model, vocab)
 
     def forward(self, x):
         return F.log_softmax(self.proj(x), dim=-1)
     
 
 def clones(module, N):
-    """
-    Produce N identical layers.
-    """
+    "Produce N identical layers."
     return nn.ModuleList([copy.deepcopy(module) for _ in range(N)])
 
 
 class Encoder(nn.Module):
-    """
-    Core encoder is a stack of N layers
-    """
-    
+    "Core encoder is a stack of N layers"
+
     def __init__(self, layer, N):
         super(Encoder, self).__init__()
         self.layers = clones(layer, N)
         self.norm = LayerNorm(layer.size)
-    
+
     def forward(self, x, mask):
-        """
-        Pass the input (and mask) through each layer in turn.
-        """
+        "Pass the input (and mask) through each layer in turn."
         for layer in self.layers:
             x = layer(x, mask)
         return self.norm(x)
 
 
 class EncoderLayer(nn.Module):
-    """
-    Encoder is made up of self-attn and feed forward (defined below)
-    """
-
+    "Encoder is made up of self-attn and feed forward (defined below)"
     def __init__(self, size, self_attn, feed_forward, dropout):
         super(EncoderLayer, self).__init__()
         self.self_attn = self_attn
@@ -100,17 +88,13 @@ class EncoderLayer(nn.Module):
         self.size = size
 
     def forward(self, x, mask):
-        """
-        Follow Figure 1 (left) for connections.
-        """
-        x = self.sublayer[0](x, lambda _x: self.self_attn(_x, _x, _x, mask))
+        "Follow Figure 1 (left) for connections."
+        x = self.sublayer[0](x, lambda x: self.self_attn(x, x, x, mask))
         return self.sublayer[1](x, self.feed_forward)
 
 
 class Decoder(nn.Module):
-    """
-    Generic N layer decoder with masking.
-    """
+    "Generic N layer decoder with masking."
 
     def __init__(self, layer, N):
         super(Decoder, self).__init__()
@@ -147,10 +131,7 @@ class DecoderLayer(nn.Module):
 
 
 class LayerNorm(nn.Module):
-    """
-    Construct a layernorm module (See citation for details).
-    """
-    # features is simply an int indicating the size of input.
+    "Construct a layernorm module (See citation for details)."
     def __init__(self, features, eps=1e-6):
         super(LayerNorm, self).__init__()
         self.a_2 = nn.Parameter(torch.ones(features))
@@ -174,9 +155,7 @@ class SublayerConnection(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, sublayer):
-        """
-        Apply residual connection to any sublayer with the same size.
-        """
+        "Apply residual connection to any sublayer with the same size."
         return x + self.dropout(sublayer(self.norm(x)))
     
     
@@ -270,24 +249,22 @@ class PositionalEncoding(nn.Module):
     """
     Implement the PE function.
     """
-    
+
     def __init__(self, d_model, dropout, max_len=5000):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
-        
+
         # Compute the positional encodings once in log space.
         pe = torch.zeros(max_len, d_model)
-        position = torch.arange(0, max_len).unsqueeze(1)
-        div_term = torch.exp(torch.arange(0, d_model, 2) *
+        position = torch.arange(0., max_len).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0., d_model, 2) *
                              -(math.log(10000.0) / d_model))
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
         pe = pe.unsqueeze(0)
         self.register_buffer('pe', pe)
-    
+
     def forward(self, x):
-        # The size of the encoding table is 5000 by default, which is fixed.
-        # Depending on how long x is, the encoding's length may vary.
         x = x + Variable(self.pe[:, :x.size(1)],
                          requires_grad=False)
         return self.dropout(x)
@@ -324,7 +301,7 @@ class Batch:
     Object for holding a batch of data with mask during training.
     """
     
-    def __init__(self, src, trg=None, pad=0):
+    def __init__(self, src: Variable, trg=None, pad=0):
         self.src = src
         self.src_mask = (src != pad).unsqueeze(-2)
         if trg is not None:
@@ -333,7 +310,7 @@ class Batch:
             self.trg_mask = \
                 self.make_std_mask(self.trg, pad)
             self.ntokens = (self.trg_y != pad).data.sum()
-    
+
     @staticmethod
     def make_std_mask(tgt, pad):
         """
@@ -363,11 +340,10 @@ def run_epoch(data_iter, model, loss_compute):
         if i % 50 == 1:
             elapsed = time.time() - start
             print("Epoch Step: %d Loss: %f Tokens per Sec: %f" %
-                    (i, loss / batch.ntokens, tokens / elapsed))
+                  (i, loss / batch.ntokens.float(), tokens / elapsed))
             start = time.time()
             tokens = 0
-    return total_loss / total_tokens
-
+    return total_loss / total_tokens.float()
 
 # global max_src_in_batch, max_tgt_in_batch
 def batch_size_fn(new, count, sofar):
@@ -429,7 +405,7 @@ class LabelSmoothing(nn.Module):
     """
     Implement label smoothing.
     """
-    
+
     def __init__(self, size, padding_idx, smoothing=0.0):
         super(LabelSmoothing, self).__init__()
         self.criterion = nn.KLDivLoss(size_average=False)
@@ -438,7 +414,7 @@ class LabelSmoothing(nn.Module):
         self.smoothing = smoothing
         self.size = size
         self.true_dist = None
-    
+
     def forward(self, x, target):
         assert x.size(1) == self.size
         true_dist = x.data.clone()
@@ -446,11 +422,11 @@ class LabelSmoothing(nn.Module):
         true_dist.scatter_(1, target.data.unsqueeze(1), self.confidence)
         true_dist[:, self.padding_idx] = 0
         mask = torch.nonzero(target.data == self.padding_idx)
-        if mask.dim() > 0:
-            true_dist.index_fill_(0, mask.squeeze(), 0.0)
+        # if mask.dim() > 0:
+        #     true_dist.index_fill_(0, mask.squeeze(), 0.0)
         self.true_dist = true_dist
         return self.criterion(x, Variable(true_dist, requires_grad=False))
-    
+
 
 class Vocab:
     def __init__(self, vocab: [str]):
@@ -465,6 +441,8 @@ class Vocab:
            cnt += 1
 
     def index_of_word(self, word: str):
+        if word not in self.word2index:
+            return self.word2index['unk_tkn']
         return self.word2index[word]
 
     def word_at_index(self, index: int):
@@ -473,7 +451,7 @@ class Vocab:
 # Transformer translation only supports integer for now.
 def get_description_vocab(allowed_variable_names: [str], syntax_tokens, number_range: (int, int)) -> [str]:
     vocab = []
-    vocab.extend(['unk_tkn', 'pad_tkn', '[', ']', 'contract', 'function', 'for', ':', ',', '.'])
+    vocab.extend(['unk_tkn', 'pad_tkn', 'sos', 'eos', '[', ']', 'contract', 'function', 'for', ':', ',', '.'])
     vocab.extend(allowed_variable_names)
     vocab.extend(Expression.get_description_vocab())
     vocab.extend(Template.get_description_vocab())
@@ -487,7 +465,7 @@ def get_description_vocab(allowed_variable_names: [str], syntax_tokens, number_r
 
 def get_solidity_vocab(allowed_variable_names: [str], syntax_tokens, number_range: (int, int)) -> [str]:
     vocab = []
-    vocab.extend(['unk_tkn', 'pad_tkn', '[', ']', '(', ')', '{', '}', ';', '.', ','])
+    vocab.extend(['unk_tkn', 'pad_tkn', 'sos', 'eos', '[', ']', '(', ')', '{', '}', ';', '.', ','])
     vocab.extend(allowed_variable_names)
     vocab.extend(Expression.get_solidity_vocab())
     vocab.extend(Template.get_solidity_vocab())
@@ -498,22 +476,6 @@ def get_solidity_vocab(allowed_variable_names: [str], syntax_tokens, number_rang
     return Vocab(list(set(vocab)))
 
 
-# A list of example descriptions to refer to...
-# The following defines the contract Q
-# It emits the following: [9517]
-# This is the end of the description of the contract Q
-# *******************************************
-# The following defines the contract W
-# It emits the following: [true]
-# This is the end of the description of the contract W
-# *******************************************
-# The following defines the contract u
-# This contract has an enum called h that has Z, C, N, r
-# This contract has a bytes32 variable called y with an assigned value [the calling of [W] with argument(s) [[the product of [k] and [-1990]]]]
-# This contract checks [the equal relationship of [the calling of [t] with argument(s) [[the equal relationship of [an enum which is [D] of [J]] and [154]], [8167], [the calling of [A] with argument(s) [[false]]], [an enum which is [F] of [O]], [an enum which is [t] of [z]]]] and [true]]
-# It emits the following: [8718]
-# This contract has an enum called U that has S, X
-# This is the end of the description of the contract u
 def tokenize_description(text: str) -> [str]:
     # add space to ':', '[', ']', ',', '.'
     text = text\
@@ -526,30 +488,6 @@ def tokenize_description(text: str) -> [str]:
     return list(map(lambda s: s.strip(' '), text.lower().split(' ')))
 
 
-# A list of example codes are given below to refer to...
-# contract u {
-# 	enum h {Z, C, N, r}
-# 	bytes32 y = W((k * -1990));
-# 	require((t((J.D == 154), 8167, A(false), O.F, z.t) == true));
-# 	emit 8718
-# 	enum U {S, X}
-# }
-# *******************************************
-# contract J {
-# 	require(((-3568 * v(-6701, 3681, A.s)) == 1995));
-# 	address u = D.g;
-# 	emit true
-# 	enum j {U}
-# 	require((C.t == 281));
-# }
-# *******************************************
-# contract Q {
-# 	enum i {u, B, b}
-# 	emit (-9078 * v)
-# 	function a(int s, float A, uint W, address Y, boolean e) public  {
-# 		require((g.I == E(true, (P == I.p))));
-# 	}
-# }
 def tokenize_solidity_code(text: str) -> [str]:
     text = text\
         .replace('{', ' { ')\
@@ -566,9 +504,85 @@ def tokenize_solidity_code(text: str) -> [str]:
     return tokens
 
 
-def convert_text_to_indices(text: str):
+def convert_description_to_indices(text: str, description_vocab: Vocab):
     # note the case where a token may not appear in the vocab - use unk_tkn!
-    pass
+    tokens = tokenize_description(text)
+    return [description_vocab.index_of_word(token) for token in tokens]
+
+
+def convert_solidity_code_to_indices(text: str, solidity_vocab: Vocab):
+    tokens = tokenize_solidity_code(text)
+    return [solidity_vocab.index_of_word(token) for token in tokens]
+
+
+# Only give names to files which contain atomic templates!
+def data_gen(batch: int, nbatches: int, text_file_name: str, code_file_name: str, path_name: str = '../../training_data/'):
+    sample_texts = np.array(load_sample_texts(text_file_name, path_name)).flatten()
+    sample_codes = np.array(load_sample_codes(code_file_name, path_name)).flatten()
+
+    allowed_variable_names = 'a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split()
+    number_range = (-100, 100)
+    description_vocab = get_description_vocab(allowed_variable_names, VAR_OPTIONS_SET + FUNC_OPTIONS_SET, number_range)
+    solidity_vocab = get_solidity_vocab(allowed_variable_names, VAR_OPTIONS_SET + FUNC_OPTIONS_SET, number_range)
+
+    MAX_LEN = 300
+
+    assert len(sample_texts) == len(sample_codes)
+    cnt = 0
+    for i in range(nbatches):
+        if cnt + batch > len(sample_texts):
+            break
+
+        src_data = []
+        tgt_data = []
+        for j in range(batch):
+            description_indices = convert_description_to_indices(sample_texts[cnt], description_vocab)
+            code_indices = convert_solidity_code_to_indices(sample_codes[cnt], solidity_vocab)
+            if len(description_indices) > MAX_LEN or len(code_indices) > MAX_LEN:
+                continue
+            description_indices += [description_vocab.index_of_word('pad_tkn')] * (MAX_LEN - len(description_indices))
+            code_indices += [solidity_vocab.index_of_word('pad_tkn')] * (MAX_LEN - len(code_indices))
+
+            src_data.append(description_indices)
+            tgt_data.append(code_indices)
+            cnt += 1
+
+        src_data = torch.from_numpy(np.array(src_data))
+        tgt_data = torch.from_numpy(np.array(tgt_data))
+
+        src = Variable(src_data, requires_grad=False)
+        tgt = Variable(tgt_data, requires_grad=False)
+        yield Batch(src, tgt, 1)
+
+
+class SimpleLossCompute:
+    def __init__(self, generator, criterion, opt=None):
+        self.generator = generator
+        self.criterion = criterion
+        self.opt = opt
+
+    def __call__(self, x, y, norm):
+        x = self.generator(x)
+        loss = self.criterion(x.contiguous().view(-1, x.size(-1)),
+                              y.contiguous().view(-1)) / norm.float()
+        loss.backward()
+        if self.opt is not None:
+            self.opt.step()
+            self.opt.optimizer.zero_grad()
+        return loss.data[0] * norm.float()
+
+
+def greedy_decoder(model: EncoderDecoder, src, src_mask, max_len, start_symbol):
+    memory = model.encode(src, src_mask)
+    ys = torch.ones(1, 1).fill_(start_symbol).type_as(src.data)
+    for i in range(max_len - 1):
+        out = model.decode(memory, src_mask, Variable(ys), Variable(subsequent_mask(ys.size(1)).type_as(src.data)))
+        prob = model.generator(out[:, -1])
+        _, next_word = torch.max(prob, dim=1)
+        next_word = next_word.data[0]
+        ys = torch.cat([ys, torch.ones(1, 1).type_as(src.data).fill_(next_word)], dim=1)
+
+    return ys
 
 
 
@@ -588,42 +602,75 @@ FUNC_OPTIONS_SET = [
 ]
 
 
-def test_tokenizers():
-    descriptions = ['This contract has a bytes32 variable called y with an assigned value [the calling of [W] with argument(s) [[the product of [k] and [-1990]]]]',
-         'This contract checks [the equal relationship of [the calling of [t] with argument(s) [[the equal relationship of [an enum which is [D] of [J]] and [154]], [8167], [the calling of [A] with argument(s) [[false]]], [an enum which is [F] of [O]], [an enum which is [t] of [z]]]] and [true]]']
-    tokens = tokenize_description(descriptions[0]) + tokenize_description(descriptions[1])
+def miscellaneous_tests():
+    # descriptions = ['This contract has a bytes32 variable called y with an assigned value [the calling of [W] with argument(s) [[the product of [k] and [-1990]]]]',
+    #      'This contract checks [the equal relationship of [the calling of [t] with argument(s) [[the equal relationship of [an enum which is [D] of [J]] and [154]], [8167], [the calling of [A] with argument(s) [[false]]], [an enum which is [F] of [O]], [an enum which is [t] of [z]]]] and [true]]']
+    # tokens = tokenize_description(descriptions[0]) + tokenize_description(descriptions[1])
+    #
+    # allowed_variable_names = 'a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split()
+    # number_range = (-10000, 10000)
+    # description_vocab = get_description_vocab(allowed_variable_names, VAR_OPTIONS_SET + FUNC_OPTIONS_SET, number_range)
+    # solidity_vocab = get_solidity_vocab(allowed_variable_names, VAR_OPTIONS_SET + FUNC_OPTIONS_SET, number_range)
+    #
+    # for token in tokens:
+    #     if token not in description_vocab.vocab:
+    #         print('This token is not in the description_vocab!', token)
+    #
+    # indices = [convert_description_to_indices(description, description_vocab) for description in descriptions]
+    # print(indices)
+    #
+    # codes = [
+    #     'require((t((J.D == 154), 8167, A(false), O.F, z.t) == true));',
+    #     'bytes32 y = W((k * -1990));',
+    #     'function a(int s, float A, uint W, address Y, boolean e) public {',
+    # ]
+    # tokens = tokenize_solidity_code(codes[0]) + tokenize_solidity_code(codes[1]) + tokenize_solidity_code(codes[2])
+    #
+    # for token in tokens:
+    #     if token not in solidity_vocab.vocab:
+    #         print('This token is not in the solidity_vocab!', token)
+    #
+    # indices = [convert_solidity_code_to_indices(code, solidity_vocab) for code in codes]
+    # print(indices)
+    pass
 
-    allowed_variable_names = 'a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split()
-    number_range = (-10000, 10000)
-    description_vocab = get_description_vocab(allowed_variable_names, VAR_OPTIONS_SET + FUNC_OPTIONS_SET, number_range)
-    solidity_vocab = get_solidity_vocab(allowed_variable_names, VAR_OPTIONS_SET + FUNC_OPTIONS_SET, number_range)
-
-    for token in tokens:
-        if token not in description_vocab.vocab:
-            print('This token is not in the description_vocab!', token)
-
-    codes = [
-        'require((t((J.D == 154), 8167, A(false), O.F, z.t) == true));',
-        'bytes32 y = W((k * -1990));',
-        'function a(int s, float A, uint W, address Y, boolean e) public {',
-    ]
-    tokens = tokenize_solidity_code(codes[0]) + tokenize_solidity_code(codes[1]) + tokenize_solidity_code(codes[2])
-
-    for token in tokens:
-        if token not in solidity_vocab.vocab:
-            print('This token is not in the solidity_vocab!', token)
 
 
 def main():
     allowed_variable_names = 'a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split()
-    number_range = (-10000, 10000)
+    number_range = (-100, 100)
 
     description_vocab = get_description_vocab(allowed_variable_names, VAR_OPTIONS_SET + FUNC_OPTIONS_SET, number_range)
     solidity_vocab = get_solidity_vocab(allowed_variable_names, VAR_OPTIONS_SET + FUNC_OPTIONS_SET, number_range)
+
+    criterion = LabelSmoothing(len(solidity_vocab.vocab), solidity_vocab.index_of_word('pad_tkn'), smoothing=0.0)
+    model = make_transformer_model(len(description_vocab.vocab), len(solidity_vocab.vocab))
+    model_opt = NoamOpt(model.src_embed[0].d_model, 1, 400, torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9))
+
+    for epoch in range(10):
+        model.train()
+        run_epoch(data_gen(5, 10, 'add_exp_descriptions.txt', 'add_exp_codes.txt'), model,
+                  SimpleLossCompute(model.generator, criterion, model_opt))
+
+        model.eval()
+        print(run_epoch(data_gen(5, 10, 'add_exp_descriptions.txt', 'add_exp_codes.txt'), model,
+                        SimpleLossCompute(model.generator, criterion, None)))
+
+    torch.save(model, '../../trained_models/naive_model')
+
+    model = torch.load('../../trained_models/naive_model')
+    model.eval()
+
+    description = '[the addition of [y] and [k]]'
+    src = Variable(torch.from_numpy(np.array([convert_description_to_indices(description, description_vocab) + [1] * 286])))
+    src_mask = Variable(torch.ones(1, 1, 300))
+    decoded_result = greedy_decoder(model, src,src_mask, max_len=300, start_symbol=2).data[0].tolist()
+    decoded_code = [solidity_vocab.word_at_index(idx) for idx in decoded_result]
+    print(decoded_code)
 
 
 
 
 if __name__ == '__main__':
-    # main()
-    test_tokenizers()
+    main()
+    # miscellaneous_tests()

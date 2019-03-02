@@ -1,6 +1,6 @@
 import sys
 
-from src.utils.contract_loader_saver import *
+from src.utils.sample_loader_saver import *
 
 
 def main():
@@ -13,7 +13,7 @@ def main():
     target_file_name = sys.argv[2]
 
     print('Loading texts...')
-    contract_texts = load_contract_texts(source_file_name, './data/')
+    contract_texts = load_sample_texts(source_file_name, './data/')
 
     print('Translating...')
     contract_parsed = []

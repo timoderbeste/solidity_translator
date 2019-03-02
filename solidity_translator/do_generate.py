@@ -1,7 +1,7 @@
 import sys
 
 from src.sample_generator import *
-from src.utils.contract_loader_saver import write_items_to_file
+from src.utils.sample_loader_saver import write_items_to_file
 from src.utils.general_utils import beautify_contract_codes
 
 POTENTIAL_NAMES = list('a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split())
@@ -32,6 +32,15 @@ def generate_samples(n_samples: int = 10, sample_names=None):
                 elif sample_name == 'variable':
                     used_names = []
                     samples.append(generate_variable(None, POTENTIAL_NAMES, False, used_names))
+                elif sample_name == 'add':
+                    used_names = []
+                    samples.append(generate_add_exp(POTENTIAL_NAMES, used_names))
+                elif sample_name == 'multiply':
+                    used_names = []
+                    samples.append(generate_multiply_exp(POTENTIAL_NAMES, used_names))
+                elif sample_name == 'divide':
+                    used_names = []
+                    samples.append(generate_divide_exp(POTENTIAL_NAMES, used_names))
 
                 last_sample = samples[len(samples) - 1]
                 last_sample_lines = last_sample.convert_to_text().split('\n')
@@ -53,7 +62,7 @@ def generate_samples(n_samples: int = 10, sample_names=None):
 
 
 def main():
-    allowed_names = ['contract', 'require', 'emit', 'enum', 'variable', 'all']
+    allowed_names = ['contract', 'require', 'emit', 'enum', 'variable', 'add', 'multiply', 'divide', 'all']
 
     if len(sys.argv) < 5:
         print('Please give arguments as follows:')

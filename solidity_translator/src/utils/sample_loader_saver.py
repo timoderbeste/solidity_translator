@@ -2,7 +2,7 @@ from functools import reduce
 from src.language_rules.templates import DefineContract
 from src.utils.general_utils import beautify_contract_codes
 
-def save_contracts_to_files(contracts: [DefineContract], text_file_name: str = None, code_file_name: str = None):
+def save_samples_to_files(contracts: [DefineContract], text_file_name: str = None, code_file_name: str = None):
     contract_texts = list(map(lambda contract: contract.convert_to_text(), contracts))
     contract_codes = list(map(lambda contract: beautify_contract_codes(contract.convert_to_solidity()), contracts))
 
@@ -12,7 +12,7 @@ def save_contracts_to_files(contracts: [DefineContract], text_file_name: str = N
         write_items_to_file(contract_codes, code_file_name)
 
 
-def write_items_to_file(items, file_name, path_name='../data/'):
+def write_items_to_file(items, file_name, path_name='../training_data/'):
     file = open(path_name + file_name, 'w')
     for item in items:
         file.write(item.strip(''))
@@ -22,7 +22,7 @@ def write_items_to_file(items, file_name, path_name='../data/'):
     file.close()
 
 
-def load_contract_texts(text_file_name: str, path_name: str = '../data/') -> [str]:
+def load_sample_texts(text_file_name: str, path_name: str = '../training_data/') -> [[str]]:
     texts_lines = read_items_from_file(text_file_name, path_name)
     contract_texts = []
 
@@ -34,7 +34,7 @@ def load_contract_texts(text_file_name: str, path_name: str = '../data/') -> [st
     return contract_texts
 
 
-def load_contract_codes(code_file_name: str, path_name: str = '../data/'):
+def load_sample_codes(code_file_name: str, path_name: str = '../training_data/') -> [[str]]:
     codes_lines = read_items_from_file(code_file_name, path_name)
     contract_codes = []
 
@@ -43,7 +43,7 @@ def load_contract_codes(code_file_name: str, path_name: str = '../data/'):
     return contract_codes
 
 
-def read_items_from_file(file_name: str, path_name: str = '../data/') -> [[str]]:
+def read_items_from_file(file_name: str, path_name: str = '../training_data/') -> [[str]]:
     file = open(path_name + file_name, 'r')
     items = []
     item = []

@@ -1,0 +1,63 @@
+contract Q {
+	emit 9517
+}
+*******************************************
+contract W {
+	emit true
+}
+*******************************************
+contract u {
+	enum h {Z, C, N, r}
+	bytes32 y = W((k * -1990));
+	require((t((J.D == 154), 8167, A(false), O.F, z.t) == true));
+	emit 8718
+	enum U {S, X}
+}
+*******************************************
+contract J {
+	require(((-3568 * v(-6701, 3681, A.s)) == 1995));
+	address u = D.g;
+	emit true
+	enum j {U}
+	require((C.t == 281));
+}
+*******************************************
+contract Q {
+	enum i {u, B, b}
+	emit (-9078 * v)
+	function a(int s, float A, uint W, address Y, boolean e) public  {
+		require((g.I == E(true, (P == I.p))));
+	}
+}
+*******************************************
+contract Y {
+	double W = true;
+	emit M
+}
+*******************************************
+contract d {
+	boolean s = true;
+	bytes32 n = z;
+}
+*******************************************
+contract o {
+	emit (-1014 * v)
+	emit (5026 == y)
+	int F = v.Y;
+	double O = A;
+}
+*******************************************
+contract W {
+	function U(int q, bytes32 G, float T, boolean Y, bytes32 k) private  {
+		uint a = n.U;
+	}
+	enum O {q, n, M, E, V}
+	emit c
+	require((false == d(l.d, o, B)));
+	bytes32 n = Y((J() * (q * -5121)), M(U.U));
+}
+*******************************************
+contract S {
+	require((L.U == V.b));
+}
+*******************************************

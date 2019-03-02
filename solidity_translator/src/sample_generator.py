@@ -3,7 +3,7 @@ from src.language_rules.templates import *
 
 NUM_POSSIBLE_CONTRACT_COMPONENTS = 5
 NUM_POSSIBLE_FUNC_COMPONENTS = 6
-NUM_POSSIBLE_EXPS = 7
+NUM_POSSIBLE_EXPS = 9
 
 MAX_NUM_ENUM_ELEMS = 5
 MAX_NUM_ARGS = 5
@@ -117,6 +117,10 @@ def generate_expression(potential_names, for_num_operation=False, used_names=Non
             return generate_boolean_exp()
         elif exp_type == 4:
             return generate_multiply_exp(potential_names, used_names=used_names)
+        elif exp_type == 7:
+            return generate_add_exp(potential_names, used_names)
+        elif exp_type == 8:
+            return generate_divide_exp(potential_names, used_names)
         elif exp_type == 5 and not for_num_operation:
             return generate_equal_exp(potential_names, used_names=used_names)
         elif exp_type == 6 and not for_num_operation:
@@ -135,7 +139,7 @@ def generate_variable_exp(potential_names, used_names=None):
     return Variable(var_name)
 
 def generate_number_exp():
-    return Number(random.randint(-10000, 10000))
+    return Number(random.randint(-100, 100))
 
 def generate_boolean_exp():
     return Boolean(True if random.randint(0, 1) == 1 else False)
@@ -144,6 +148,16 @@ def generate_multiply_exp(potential_names, used_names=None):
     exp1 = generate_expression(potential_names, for_num_operation=True, used_names=used_names)
     exp2 = generate_expression(potential_names, for_num_operation=True, used_names=used_names)
     return Multiply(exp1, exp2)
+
+def generate_add_exp(potential_names, used_names=None):
+    exp1 = generate_expression(potential_names, for_num_operation=True, used_names=used_names)
+    exp2 = generate_expression(potential_names, for_num_operation=True, used_names=used_names)
+    return Add(exp1, exp2)
+
+def generate_divide_exp(potential_names, used_names=None):
+    exp1 = generate_expression(potential_names, for_num_operation=True, used_names=used_names)
+    exp2 = generate_expression(potential_names, for_num_operation=True, used_names=used_names)
+    return Divide(exp1, exp2)
 
 def generate_equal_exp(potential_names, used_names=None):
     exp1 = generate_expression(potential_names, used_names = used_names)

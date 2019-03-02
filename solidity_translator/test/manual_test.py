@@ -1,6 +1,6 @@
 from src.language_rules.templates import *
 from src.sample_generator import generate_contract
-from src.utils.contract_loader_saver import *
+from src.utils.sample_loader_saver import *
 def manual_test():
 
     # print('constructing...')
@@ -243,15 +243,15 @@ def generate_contracts(n_contracts=10):
 def main():
     # generate and save new contracts
     # contracts = generate_contracts(20)
-    # save_contracts_to_files(contracts, 'contract_texts.txt', 'contract_codes.txt')
+    # save_samples_to_files(contracts, 'contract_texts.txt', 'contract_codes.txt')
     
     # load from files
-    contract_texts = load_contract_texts('contract_texts.txt')
+    contract_texts = load_sample_texts('contract_descriptions.txt')
     contract_parsed = []
     for contract_text in contract_texts:
         contract_parsed.append(DefineContract.parse_template_from_text(contract_text))
 
-    save_contracts_to_files(contract_parsed, 'parsed_contract_texts.txt', 'parsed_contract_codes.txt')
+    save_samples_to_files(contract_parsed, 'parsed_contract_descriptions.txt', 'parsed_contract_codes.txt')
 
 if __name__ == '__main__':
     main()
