@@ -109,3 +109,5 @@ venv.bak/
 
 # others
 solidity_translator/.idea/*
+solidity_translator/data/
+solidity_translator/training_data/
