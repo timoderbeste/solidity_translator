@@ -4,9 +4,10 @@ from src.sample_generator import *
 from src.utils.sample_loader_saver import write_items_to_file
 from src.utils.general_utils import beautify_contract_codes
 
-POTENTIAL_NAMES = list('a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split())
+# POTENTIAL_NAMES = list('a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split())
+POTENTIAL_NAMES = list('a b c'.split())
 MAX_LINE_LEN = 300
-PRINT_EVERY = 10000
+PRINT_EVERY = 1000
 
 
 def generate_samples(n_samples: int = 10, sample_names=None):
@@ -41,6 +42,16 @@ def generate_samples(n_samples: int = 10, sample_names=None):
                 elif sample_name == 'divide':
                     used_names = []
                     samples.append(generate_divide_exp(POTENTIAL_NAMES, used_names))
+                elif sample_name == 'add_exp_with_placeholder':
+                    used_names = []
+                    samples.append(generate_add_exp(POTENTIAL_NAMES, used_names, True, True))
+                elif sample_name == 'contract_with_add_exp_with_placeholder':
+                    used_names = []
+                    samples.append(generate_add_only_contract(POTENTIAL_NAMES, used_names))
+
+                elif sample_name == 'contract_with_func_and_add_exp_with_placeholder':
+                    used_names = []
+                    samples.append(generate_add_and_func_habenden_contract(POTENTIAL_NAMES, used_names))
 
                 last_sample = samples[len(samples) - 1]
                 last_sample_lines = last_sample.convert_to_text().split('\n')
@@ -62,7 +73,10 @@ def generate_samples(n_samples: int = 10, sample_names=None):
 
 
 def main():
-    allowed_names = ['contract', 'require', 'emit', 'enum', 'variable', 'add', 'multiply', 'divide', 'all']
+    allowed_names = ['contract', 'require', 'emit', 'enum', 'variable', 'add', 'multiply', 'divide',
+                     'add_exp_with_placeholder', 'contract_with_add_exp_with_placeholder',
+                     'contract_with_func_and_add_exp_with_placeholder',
+                     'all']
 
     if len(sys.argv) < 5:
         print('Please give arguments as follows:')
@@ -93,10 +107,10 @@ def main():
     samples = generate_samples(n, given_names)
     write_items_to_file(list(map(lambda sample: sample.convert_to_text(), samples)),
                         text_file_name,
-                        './training_data/')
+                        './training_data/', formatize=False)
     write_items_to_file(list(map(lambda sample: beautify_contract_codes(sample.convert_to_solidity()), samples)),
                              code_file_name,
-                             './training_data/')
+                             './training_data/', formatize=False)
 
 if __name__ == '__main__':
     main()

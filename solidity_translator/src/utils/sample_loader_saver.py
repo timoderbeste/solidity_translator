@@ -12,13 +12,17 @@ def save_samples_to_files(contracts: [DefineContract], text_file_name: str = Non
         write_items_to_file(contract_codes, code_file_name)
 
 
-def write_items_to_file(items, file_name, path_name='../training_data/'):
+def write_items_to_file(items, file_name, path_name='../training_data/', formatize=True):
     file = open(path_name + file_name, 'w')
+
     for item in items:
-        file.write(item.strip(''))
-        if item[len(item) - 1] != '\n':
+        file.write(item.strip('') if formatize else item.strip('').replace('\n', ' \\n '))
+        if item[len(item) - 1] != '\n' and formatize:
             file.write('\n')
-        file.write('*******************************************\n')
+        if formatize:
+            file.write('*******************************************\n')
+        else:
+            file.write('\n')
     file.close()
 
 

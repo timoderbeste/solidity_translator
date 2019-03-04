@@ -29,6 +29,26 @@ def __init__(self, max_recurrsive_depth):
     self.max_recurrsive_depth = max_recurrsive_depth
     self.curr_recurrsive_depth = 0
 
+
+def generate_add_only_contract(potential_names: [str], used_names: [str]=None):
+    unused_names = get_unused_names(potential_names, used_names=used_names)
+    name = get_random_name(unused_names)
+    used_names.append(name)
+    components = [generate_add_only_variable('contract', potential_names, used_names=used_names)]
+
+    return DefineContract(name, components)
+
+
+def generate_add_and_func_habenden_contract(potential_names: [str], used_names: [str]=None):
+    unused_names = get_unused_names(potential_names, used_names=used_names)
+    name = get_random_name(unused_names)
+    used_names.append(name)
+    components = [generate_add_only_variable('contract', potential_names, used_names=used_names),
+                  generate_function('Contract', potential_names, used_names, placeholder=True, var_num_only=True)]
+
+    return DefineContract(name, components)
+
+
 def generate_contract(potential_names: [str], used_names: [str]=None):
     unused_names = get_unused_names(potential_names, used_names=used_names)
     name = get_random_name(unused_names)
@@ -72,6 +92,21 @@ def generate_enum(context: str, potential_names: [str], used_names=None):
 
     return DefineEnum(context, name, elems)
 
+
+def generate_add_only_variable(context, potential_names: [str], for_func_param=False, used_names=None):
+    name = get_random_name(potential_names)
+    if name in used_names:
+        options = None
+    else:
+        used_names.append(name)
+        option_idx = random.randint(0, len(VAR_OPTIONS_SET) - 1)
+        options = [VAR_OPTIONS_SET[option_idx]]
+
+    # value = generate_expression(potential_names, used_names=used_names, for_num_operation=True, var_num_only=True, placeholder=True)
+    value = generate_add_exp(potential_names, used_names, placeholder=True, var_num_only=True)
+    return DefineVariable(None if for_func_param else context, name, options, None if for_func_param else value)
+
+
 def generate_variable(context, potential_names: [str], for_func_param=False, used_names=None):
     name = get_random_name(potential_names)
     if name in used_names:
@@ -84,11 +119,11 @@ def generate_variable(context, potential_names: [str], for_func_param=False, use
     value = generate_expression(potential_names, used_names=used_names)
     return DefineVariable(None if for_func_param else context, name, options, None if for_func_param else value)
 
-def generate_function(context: str, potential_names: [str], used_names=None):
+def generate_function(context: str, potential_names: [str], used_names=None, placeholder=False, var_num_only=False):
     name = get_random_name(potential_names)
     options = [FUNC_OPTIONS_SET[random.randint(0, len(FUNC_OPTIONS_SET) - 1)]]
-    params = [generate_variable(None, potential_names, True, used_names=used_names) for _ in range(MAX_NUM_ARGS)]
-    components = get_func_components('function', potential_names, used_names=used_names)
+    params = [generate_variable(None, potential_names, for_func_param=True, used_names=used_names) for _ in range(random.randint(0, MAX_NUM_ARGS))]
+    components = get_func_components('function', potential_names, used_names=used_names, placeholder=placeholder, var_num_only=var_num_only)
     return DefineFunction(context, name, options, params, components)
 
 def generate_if_else(potential_names, used_names=None):
@@ -104,27 +139,34 @@ def generate_for_loop(context, potential_names, used_names=None):
     components = get_func_components(None, potential_names, used_names=used_names)
     return DefineFor(var, bool_cond, increment, components)
 
-def generate_expression(potential_names, for_num_operation=False, used_names=None):
+def generate_expression(potential_names, for_num_operation=False, used_names=None, placeholder=False, var_num_only=False):
     while True:
-        exp_type = random.randint(0, NUM_POSSIBLE_EXPS - 1)
-        if exp_type == 0:
-            return generate_call_exp(potential_names, used_names=used_names)
-        elif exp_type == 1:
-            return generate_variable_exp(potential_names, used_names=used_names)
-        elif exp_type == 2:
-            return generate_number_exp()
-        elif exp_type == 3 and not for_num_operation:
-            return generate_boolean_exp()
-        elif exp_type == 4:
-            return generate_multiply_exp(potential_names, used_names=used_names)
-        elif exp_type == 7:
-            return generate_add_exp(potential_names, used_names)
-        elif exp_type == 8:
-            return generate_divide_exp(potential_names, used_names)
-        elif exp_type == 5 and not for_num_operation:
-            return generate_equal_exp(potential_names, used_names=used_names)
-        elif exp_type == 6 and not for_num_operation:
-            return generate_enum_exp(potential_names, used_names=used_names)
+        if not var_num_only:
+            exp_type = random.randint(0, NUM_POSSIBLE_EXPS - 1)
+            if exp_type == 0:
+                return generate_call_exp(potential_names, used_names=used_names)
+            elif exp_type == 1:
+                return generate_variable_exp(potential_names, used_names=used_names)
+            elif exp_type == 2:
+                return generate_number_exp(placeholder)
+            elif exp_type == 3 and not for_num_operation:
+                return generate_boolean_exp()
+            elif exp_type == 4:
+                return generate_multiply_exp(potential_names, used_names=used_names)
+            elif exp_type == 7:
+                return generate_add_exp(potential_names, used_names)
+            elif exp_type == 8:
+                return generate_divide_exp(potential_names, used_names)
+            elif exp_type == 5 and not for_num_operation:
+                return generate_equal_exp(potential_names, used_names=used_names)
+            elif exp_type == 6 and not for_num_operation:
+                return generate_enum_exp(potential_names, used_names=used_names)
+        else:
+            exp_type = random.randint(0, 1)
+            if exp_type == 0:
+                return generate_variable_exp(potential_names, used_names=used_names)
+            else:
+                return generate_number_exp(placeholder)
 
 def generate_call_exp(potential_names, used_names=None):
     name = get_random_name(potential_names)
@@ -138,8 +180,11 @@ def generate_variable_exp(potential_names, used_names=None):
     var_name = get_random_name(potential_names)
     return Variable(var_name)
 
-def generate_number_exp():
-    return Number(random.randint(-100, 100))
+def generate_number_exp(use_placeholder=False):
+    if not use_placeholder:
+        return Number(random.randint(-100, 100))
+    else:
+        return Placeholder('NUM' + str(random.randint(1, 3)))
 
 def generate_boolean_exp():
     return Boolean(True if random.randint(0, 1) == 1 else False)
@@ -149,9 +194,9 @@ def generate_multiply_exp(potential_names, used_names=None):
     exp2 = generate_expression(potential_names, for_num_operation=True, used_names=used_names)
     return Multiply(exp1, exp2)
 
-def generate_add_exp(potential_names, used_names=None):
-    exp1 = generate_expression(potential_names, for_num_operation=True, used_names=used_names)
-    exp2 = generate_expression(potential_names, for_num_operation=True, used_names=used_names)
+def generate_add_exp(potential_names, used_names=None, placeholder=False, var_num_only=False):
+    exp1 = generate_expression(potential_names, for_num_operation=True, used_names=used_names, placeholder=placeholder, var_num_only=var_num_only)
+    exp2 = generate_expression(potential_names, for_num_operation=True, used_names=used_names, placeholder=placeholder, var_num_only=var_num_only)
     return Add(exp1, exp2)
 
 def generate_divide_exp(potential_names, used_names=None):
@@ -180,21 +225,25 @@ def get_unused_names(potential_names, used_names):
         unused_names = list(set(potential_names) - set(used_names))
     return unused_names
 
-def get_func_components(context, potential_names, used_names=None):
+def get_func_components(context, potential_names, used_names=None, placeholder=False, var_num_only=False):
     components = []
-    num_components = random.randint(1, MAX_NUM_COMPONENTS)
-    for _ in range(num_components):
-        component_type = random.randint(0, NUM_POSSIBLE_FUNC_COMPONENTS - 1)
-        if component_type == 0:
-            components.append(generate_enum(context, potential_names, used_names=used_names))
-        elif component_type == 1:
-            components.append(generate_variable(context, potential_names, used_names=used_names))
-        elif component_type == 2:
-            components.append(generate_if_else(potential_names, used_names=used_names))
-        elif component_type == 3:
-            components.append(generate_for_loop(context, potential_names, used_names=used_names))
-        elif component_type == 4:
-            components.append(generate_require(context, potential_names, used_names))
-        elif component_type == 5:
-            components.append(generate_emit(potential_names, used_names))
+
+    if not placeholder and not var_num_only:
+        num_components = random.randint(1, MAX_NUM_COMPONENTS)
+        for _ in range(num_components):
+            component_type = random.randint(0, NUM_POSSIBLE_FUNC_COMPONENTS - 1)
+            if component_type == 0:
+                components.append(generate_enum(context, potential_names, used_names=used_names))
+            elif component_type == 1:
+                components.append(generate_variable(context, potential_names, used_names=used_names))
+            elif component_type == 2:
+                components.append(generate_if_else(potential_names, used_names=used_names))
+            elif component_type == 3:
+                components.append(generate_for_loop(context, potential_names, used_names=used_names))
+            elif component_type == 4:
+                components.append(generate_require(context, potential_names, used_names))
+            elif component_type == 5:
+                components.append(generate_emit(potential_names, used_names))
+    else:
+        components.append(generate_add_only_variable(context, potential_names, for_func_param=False, used_names=used_names))
     return components

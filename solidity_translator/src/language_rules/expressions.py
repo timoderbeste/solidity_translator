@@ -86,6 +86,30 @@ class Variable(Expression):
         return []
 
 
+class Placeholder(Expression):
+    def __init__(self, placeholder_name):
+        Expression.__init__(self)
+        self.placeholder_name = placeholder_name
+
+    def convert_to_text(self):
+        return '[' + self.placeholder_name + ']'
+
+    def convert_to_solidity(self):
+        return self.placeholder_name
+
+    @staticmethod
+    def parse_expression_from_text(text):
+        return Variable(text[1:-1])
+
+    @staticmethod
+    def get_description_vocab() -> [str]:
+        return []
+
+    @staticmethod
+    def get_solidity_vocab() -> [str]:
+        return []
+
+
 class Number(Expression):
     def __init__(self, number):
         super(Expression).__init__()
