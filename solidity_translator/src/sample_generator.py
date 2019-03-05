@@ -30,21 +30,21 @@ def __init__(self, max_recurrsive_depth):
     self.curr_recurrsive_depth = 0
 
 
-def generate_add_only_contract(potential_names: [str], used_names: [str]=None):
+def generate_add_only_contract(potential_names: [str], used_names: [str]=None, placeholder=False, var_num_only=False):
     unused_names = get_unused_names(potential_names, used_names=used_names)
     name = get_random_name(unused_names)
     used_names.append(name)
-    components = [generate_add_only_variable('contract', potential_names, used_names=used_names)]
+    components = [generate_add_only_variable('contract', potential_names, used_names=used_names, placeholder=placeholder, var_num_only=var_num_only)]
 
     return DefineContract(name, components)
 
 
-def generate_add_and_func_habenden_contract(potential_names: [str], used_names: [str]=None):
+def generate_add_and_func_habenden_contract(potential_names: [str], used_names: [str]=None, placeholder=False, var_num_only=False):
     unused_names = get_unused_names(potential_names, used_names=used_names)
     name = get_random_name(unused_names)
     used_names.append(name)
-    components = [generate_add_only_variable('contract', potential_names, used_names=used_names),
-                  generate_function('Contract', potential_names, used_names, placeholder=True, var_num_only=True)]
+    components = [generate_add_only_variable('contract', potential_names, used_names=used_names, placeholder=placeholder, var_num_only=var_num_only),
+                  generate_function('Contract', potential_names, used_names, placeholder=placeholder, var_num_only=var_num_only)]
 
     return DefineContract(name, components)
 
@@ -93,7 +93,7 @@ def generate_enum(context: str, potential_names: [str], used_names=None):
     return DefineEnum(context, name, elems)
 
 
-def generate_add_only_variable(context, potential_names: [str], for_func_param=False, used_names=None):
+def generate_add_only_variable(context, potential_names: [str], for_func_param=False, used_names=None, placeholder=False, var_num_only=False):
     name = get_random_name(potential_names)
     if name in used_names:
         options = None
@@ -103,7 +103,7 @@ def generate_add_only_variable(context, potential_names: [str], for_func_param=F
         options = [VAR_OPTIONS_SET[option_idx]]
 
     # value = generate_expression(potential_names, used_names=used_names, for_num_operation=True, var_num_only=True, placeholder=True)
-    value = generate_add_exp(potential_names, used_names, placeholder=True, var_num_only=True)
+    value = generate_add_exp(potential_names, used_names, placeholder=placeholder, var_num_only=var_num_only)
     return DefineVariable(None if for_func_param else context, name, options, None if for_func_param else value)
 
 
@@ -245,5 +245,5 @@ def get_func_components(context, potential_names, used_names=None, placeholder=F
             elif component_type == 5:
                 components.append(generate_emit(potential_names, used_names))
     else:
-        components.append(generate_add_only_variable(context, potential_names, for_func_param=False, used_names=used_names))
+        components.append(generate_add_only_variable(context, potential_names, for_func_param=False, used_names=used_names, placeholder=placeholder, var_num_only=var_num_only))
     return components

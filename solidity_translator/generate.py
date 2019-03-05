@@ -51,7 +51,10 @@ def generate_samples(n_samples: int = 10, sample_names=None):
 
                 elif sample_name == 'contract_with_func_and_add_exp_with_placeholder':
                     used_names = []
-                    samples.append(generate_add_and_func_habenden_contract(POTENTIAL_NAMES, used_names))
+                    samples.append(generate_add_and_func_habenden_contract(POTENTIAL_NAMES, used_names, var_num_only=True, placeholder=True))
+                elif sample_name == 'contract_with_func_and_add_exp':
+                    used_names = []
+                    samples.append(generate_add_and_func_habenden_contract(POTENTIAL_NAMES, used_names, var_num_only=True, placeholder=False))
 
                 last_sample = samples[len(samples) - 1]
                 last_sample_lines = last_sample.convert_to_text().split('\n')
@@ -76,12 +79,13 @@ def main():
     allowed_names = ['contract', 'require', 'emit', 'enum', 'variable', 'add', 'multiply', 'divide',
                      'add_exp_with_placeholder', 'contract_with_add_exp_with_placeholder',
                      'contract_with_func_and_add_exp_with_placeholder',
+                     'contract_with_func_and_add_exp',
                      'all']
 
-    if len(sys.argv) < 5:
+    if len(sys.argv) < 6:
         print('Please give arguments as follows:')
-        print('python do_generate.py text_file_name.txt code_file_name.txt 10 emit')
-        print('The example above will generate 10 samples of emit template and save it in the corresponding files in data directory')
+        print('python generate.py text_file_name.txt code_file_name.txt 10 emit no')
+        print('The example above will generate 10 samples of emit template with no format and save it in the corresponding files in data directory')
         print('Allowed names are', allowed_names)
         exit(1)
     text_file_name = sys.argv[1]
@@ -93,7 +97,7 @@ def main():
         exit(1)
 
     given_names = []
-    for i in range(4, len(sys.argv)):
+    for i in range(4, len(sys.argv) - 1):
         name = sys.argv[i]
         if name not in allowed_names:
             print('Please only give names in the list below:')
@@ -103,14 +107,18 @@ def main():
 
     if 'all' in given_names:
         given_names = allowed_names[:-1]
+        
+    formatize = True if sys.argv[len(sys.argv) - 1] == 'yes' else False
 
     samples = generate_samples(n, given_names)
     write_items_to_file(list(map(lambda sample: sample.convert_to_text(), samples)),
                         text_file_name,
-                        './training_data/', formatize=False)
+                        './training_data/',
+                        formatize=formatize)
     write_items_to_file(list(map(lambda sample: beautify_contract_codes(sample.convert_to_solidity()), samples)),
-                             code_file_name,
-                             './training_data/', formatize=False)
+                        code_file_name,
+                        './training_data/',
+                        formatize=formatize)
 
 if __name__ == '__main__':
     main()

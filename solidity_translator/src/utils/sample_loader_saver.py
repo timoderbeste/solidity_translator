@@ -59,3 +59,23 @@ def read_items_from_file(file_name: str, path_name: str = '../training_data/') -
             items.append(item)
             item = []
     return items
+
+def write_number_tables_to_file(number_tables: [dict], file_name: str, path_name: str = './data/'):
+    file = open(path_name + file_name, 'w')
+    for number_table in number_tables:
+        for k in number_table:
+            v = number_table[k]
+            file.write('%s,%d\n' % (k, v))
+        file.write('*******************************************\n')
+    
+    file.close()
+    
+def write_extracted_contracts_descriptions_to_file(extracted_contracts_descriptions: [str], file_name: str, path_name: str = './data/'):
+    file = open(path_name + file_name, 'w')
+    
+    for extracted_contracts_description in extracted_contracts_descriptions:
+        file.write(extracted_contracts_description)
+        file.write('\n')
+        
+    file.close()
+    

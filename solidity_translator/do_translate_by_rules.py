@@ -7,7 +7,7 @@ def main():
     if len(sys.argv) != 3:
         print('Please first give the name of the file containing the text to be translated and then'
               'the name of the file where the output should be.')
-        print('python do_translate.py source_file_name target_file_name')
+        print('python do_translate_by_rules.py source_file_name target_file_name')
         exit(1)
     source_file_name = sys.argv[1]
     target_file_name = sys.argv[2]
