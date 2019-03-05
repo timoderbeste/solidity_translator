@@ -8,7 +8,7 @@ def extract_numbers_from_contract_description(contract_description: [str]) -> (s
     # Combine all strings into one
     contract_description = reduce(lambda s1, s2: s1 + ' \\n ' + s2, contract_description) + ' \\n'
     number_table = {}
-    cnt = 0
+    cnt = 1
     
     contract_description = contract_description.replace('\n', '\\n').replace('[', '[ ').replace(']', ' ]')
     extracted_contract_description = contract_description.split(' ')
@@ -47,8 +47,8 @@ def main():
         
     sls.write_extracted_contracts_descriptions_to_file(extracted_contracts_descriptions, output_file_name)
     sls.write_number_tables_to_file(number_tables, number_tabel_file_name)
-    print(contracts_descriptions)
-    
+
+    print('Done preparing the text.')
 
 if __name__ == '__main__':
     main()

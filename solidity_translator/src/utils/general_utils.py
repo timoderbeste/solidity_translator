@@ -160,7 +160,7 @@ def beautify_contract_codes(contract_code: str) -> str:
     indent = ''
     for i in range(len(contract_code_lines)):
 
-        if contract_code_lines[i] == '}':
+        if contract_code_lines[i] == '}' or contract_code_lines[i-1:] == '} ':
             indent = indent[0: len(indent) - 1]
             contract_code_lines[i] = indent + contract_code_lines[i]
         else:

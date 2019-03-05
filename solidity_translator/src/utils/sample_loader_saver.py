@@ -78,4 +78,29 @@ def write_extracted_contracts_descriptions_to_file(extracted_contracts_descripti
         file.write('\n')
         
     file.close()
-    
+
+def read_lines_from_file(file_name: str, path_name: str='./data/') -> [str]:
+    file = open(path_name + file_name, 'r')
+
+    lines = []
+    for line in file:
+        lines.append(line)
+
+    file.close()
+    return lines
+
+def load_number_tables_from_file(file_name: str, path_name: str='./data/') -> [dict]:
+    number_tables = []
+    number_table = {}
+
+    file = open(path_name + file_name, 'r')
+    for line in file:
+        if line != '*******************************************\n':
+            k, v = line.split(',')
+            v = int(v)
+            number_table[k] = v
+        else:
+            number_tables.append(number_table)
+            number_table = {}
+
+    return number_tables
