@@ -27,7 +27,7 @@ The templates used to randomly generate the English texts and solidity codes are
 
 ## Improving the translator by training the transformer model with contracts of more variety sorts
 
-If one wants to write his own contracts and test the translation functionality, he could refer two these two files in side the `solidity_translator/src/language_rules` directory, which contains the formats of the descriptions for each expression or template as well as the corresponding parsing rules, i.e. how to construct an expression or template if given a well written English text description.
+If one wants to write his own contracts and test the translation functionality, he could refer to these two files in side the `solidity_translator/src/language_rules` directory, which contains the formats of the descriptions for each expression or template as well as the corresponding parsing rules, i.e. how to construct an expression or template if given a well written English text description.
 
 One should keep in mind that the currently trained transformer model is not powerful enough to handle all sorts of translation. It is trained to prove the possibility of using a transformer to do the translation task. One can certainly enhance the translator by doing the following:
 
