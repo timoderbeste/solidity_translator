@@ -474,8 +474,3 @@ class Call(Expression):
     @staticmethod
     def get_solidity_vocab() -> [str]:
         return []
-
-
-if __name__ == '__main__':
-    print(Expression.parse_expression_from_text('[the calling of [foo] with argument(s) [[a], [b]]]').convert_to_solidity())
-    print(Expression.parse_expression_from_text('[the division of [the product of [10] and [20]] from [the division of [10] from [20]]]').convert_to_solidity())
