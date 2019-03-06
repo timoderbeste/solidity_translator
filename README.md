@@ -5,7 +5,7 @@
 #### Wang, Ning. She, Zuohao.
 
 ## Overview
-Please note that this project is by far only a **prototype** or a **proof of concept**. It does not support all features the language solidity does. For example, only integer is supported at the moment for atomic values. *I.e. there is no boolean value or string etc. supported.*
+Please note that this project is by far only a **prototype** or a **proof of concept**. *It does not support all features the language solidity does. For example, only integer is supported at the moment for atomic values. I.e. there is no boolean value or string etc. supported. In addition, there is no array type or dictionary type implemented.* 
 
 ![alt text](https://github.com/timoderbeste/solidity_translator/blob/master/Related%20Resources/translate_demo.png)
 
@@ -66,4 +66,6 @@ python train.py -data data/multi30k.atok.low.pt -save_model trained -save_mode b
 - Each `Expression` or `Template` object can be used to both generate corresponding texts and codes and to parse a correctly written texts into the corresponding objects to assist the rule-based translation.
 - For the translation done by transformer, a preprocessing step is taken to strip numbers from the text and replace them with tokens of format `NUM#` where `#` indicates which number it corresponds to. This is done using a dictionary, which is stored in a file. After the translation is done, the numbers are putting back into the files by reversing the preprocessing step. 
 - So far the support for variables is limited. However, it can be drastically improved by using the same mechanism that replaces numbers with tokens. The variable names can be stripped from the description texts and replaced with tokens of format `VAR#`. After the translation, the names can be restored with the saved dictionary. This way, the model can support way more variable names and the dimension of vocabulary will not be dramatically increased.
-- This project is only capable of translating English descriptions of very restricted formats into solidity code. In the future, it can be improved by training the transformer so that it can translate a English description of more relaxed format into the solidity code. The preprocessing step which involves replacing numbers and variable names with tags can also be done by a well trained transformer. The data can be gained by hiring workers to write descriptions instead of using automatically generated samples. 
+- This project is only capable of translating English descriptions of very restricted formats into solidity code. In the future, it can be improved by training the transformer so that it can translate a English description of more relaxed format into the solidity code. The preprocessing step which involves replacing numbers and variable names with tags can also be done by a well trained transformer. The data can be obtained by hiring workers to write descriptions instead of using automatically generated samples. 
+- More templates should be added such as arrays or dictionaries.
+- Further improvements include adding variable inference. For example, if the user inputs text such as "a bunch of books", the translator should at least be able to infer that there is an array which contains objects of type `Book`. 
