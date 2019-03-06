@@ -6,9 +6,7 @@
 
 ## Overview
 
-![image-20190305203242972](./Related Resources/translate_demo.png)
-
-
+![alt text](https://github.com/timoderbeste/solidity_translator/blob/master/Related%20Resources/translate_demo.png)
 
 Please note that this project is by far only a **prototype** or a **proof of concept**. It does not support all features the language solidity does. For example, only integer is supported at the moment for atomic values. I.e. there is no boolean value or string etc. supported.*
 
@@ -22,7 +20,7 @@ python generate.py 5_example_contracts_descriptions.txt \ 5_example_contracts_co
 
 The image below shows the output of the above command. 
 
-![image-20190305203242972](./Related Resources/generate_demo.png)
+![alt text](https://github.com/timoderbeste/solidity_translator/blob/master/Related%20Resources/generate_demo.png)
 
 The generated contracts are random. The dimension of the input names however is limited to only several alphabetic letters.
 
