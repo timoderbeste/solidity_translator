@@ -15,7 +15,7 @@ Above is an image demonstrating how to use this rudimentary translator that can 
 The rudimentary English text and the corresponding solidity code to train the transformer are generated together using the python script `generate.py` The generated files will be inside the `data` directory. An example usage is given below. 
 
 ```shell
-python generate.py 5_example_contracts_descriptions.txt \ 5_example_contracts_codes.txt 5 contract yes
+python generate.py 5_example_contracts_descriptions.txt 5_example_contracts_codes.txt 5 contract yes
 ```
 
 The image below shows the output of the above command. 
