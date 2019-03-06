@@ -8,7 +8,7 @@
 
 ![alt text](https://github.com/timoderbeste/solidity_translator/blob/master/Related%20Resources/translate_demo.png)
 
-Please note that this project is by far only a **prototype** or a **proof of concept**. It does not support all features the language solidity does. For example, only integer is supported at the moment for atomic values. I.e. there is no boolean value or string etc. supported.*
+Please note that this project is by far only a **prototype** or a **proof of concept**. It does not support all features the language solidity does. For example, only integer is supported at the moment for atomic values. *I.e. there is no boolean value or string etc. supported.*
 
 Above is an image demonstrating how to use this rudimentary translator that can translate a relatively restricted text in English into the code solidity to define a smart contract. The translation can be done in two methods: by rule or through the usage of a transformer obtained [here](https://github.com/jadore801120/attention-is-all-you-need-pytorch). 
 
