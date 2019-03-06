@@ -113,11 +113,11 @@ def main():
     samples = generate_samples(n, given_names)
     write_items_to_file(list(map(lambda sample: sample.convert_to_text(), samples)),
                         text_file_name,
-                        './training_data/',
+                        './data/',
                         formatize=formatize)
     write_items_to_file(list(map(lambda sample: beautify_contract_codes(sample.convert_to_solidity()), samples)),
                         code_file_name,
-                        './training_data/',
+                        './data/',
                         formatize=formatize)
 
 if __name__ == '__main__':

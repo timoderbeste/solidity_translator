@@ -12,7 +12,7 @@ def save_samples_to_files(contracts: [DefineContract], text_file_name: str = Non
         write_items_to_file(contract_codes, code_file_name)
 
 
-def write_items_to_file(items, file_name, path_name='../training_data/', formatize=True):
+def write_items_to_file(items, file_name, path_name='../data/', formatize=True):
     file = open(path_name + file_name, 'w')
 
     for item in items:
@@ -26,7 +26,7 @@ def write_items_to_file(items, file_name, path_name='../training_data/', formati
     file.close()
 
 
-def load_sample_texts(text_file_name: str, path_name: str = '../training_data/') -> [[str]]:
+def load_sample_texts(text_file_name: str, path_name: str = '../data/') -> [[str]]:
     texts_lines = read_items_from_file(text_file_name, path_name)
     contract_texts = []
 
@@ -38,7 +38,7 @@ def load_sample_texts(text_file_name: str, path_name: str = '../training_data/')
     return contract_texts
 
 
-def load_sample_codes(code_file_name: str, path_name: str = '../training_data/') -> [[str]]:
+def load_sample_codes(code_file_name: str, path_name: str = '../data/') -> [[str]]:
     codes_lines = read_items_from_file(code_file_name, path_name)
     contract_codes = []
 
@@ -47,7 +47,7 @@ def load_sample_codes(code_file_name: str, path_name: str = '../training_data/')
     return contract_codes
 
 
-def read_items_from_file(file_name: str, path_name: str = '../training_data/') -> [[str]]:
+def read_items_from_file(file_name: str, path_name: str = '../data/') -> [[str]]:
     file = open(path_name + file_name, 'r')
     items = []
     item = []
