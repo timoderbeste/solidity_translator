@@ -49,12 +49,12 @@ def generate_samples(n_samples: int = 10, sample_names=None):
                     used_names = []
                     samples.append(generate_add_only_contract(POTENTIAL_NAMES, used_names))
 
-                elif sample_name == 'contract_with_func_and_add_exp_with_placeholder':
+                elif sample_name == 'contract_with_func_and_var_exp_with_placeholder':
                     used_names = []
-                    samples.append(generate_add_and_func_habenden_contract(POTENTIAL_NAMES, used_names, var_num_only=True, placeholder=True))
-                elif sample_name == 'contract_with_func_and_add_exp':
+                    samples.append(generate_var_and_func_habenden_contract(POTENTIAL_NAMES, used_names, var_num_only=True, placeholder=True))
+                elif sample_name == 'contract_with_func_and_var_exp':
                     used_names = []
-                    samples.append(generate_add_and_func_habenden_contract(POTENTIAL_NAMES, used_names, var_num_only=True, placeholder=False))
+                    samples.append(generate_var_and_func_habenden_contract(POTENTIAL_NAMES, used_names, var_num_only=True, placeholder=False))
 
                 last_sample = samples[len(samples) - 1]
                 last_sample_lines = last_sample.convert_to_text().split('\n')
@@ -78,8 +78,8 @@ def generate_samples(n_samples: int = 10, sample_names=None):
 def main():
     allowed_names = ['contract', 'require', 'emit', 'enum', 'variable', 'add', 'multiply', 'divide',
                      'add_exp_with_placeholder', 'contract_with_add_exp_with_placeholder',
-                     'contract_with_func_and_add_exp_with_placeholder',
-                     'contract_with_func_and_add_exp',
+                     'contract_with_func_and_var_exp_with_placeholder',
+                     'contract_with_func_and_var_exp',
                      'all']
 
     if len(sys.argv) < 6:

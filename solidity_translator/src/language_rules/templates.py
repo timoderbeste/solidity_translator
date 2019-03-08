@@ -19,6 +19,8 @@ class Template:
                 return Emit.parse_template_from_text(text)
             elif text[0].find('has an enum called') != -1:
                 return DefineEnum.parse_template_from_text(text)
+            elif text[0].find('returns the following') != -1:
+                return Return.parse_template_from_text(text)
             else:
                 return DefineVariable.parse_template_from_text(text)
 
@@ -215,6 +217,32 @@ class DefineVariable(Template):
     @staticmethod
     def get_solidity_vocab() -> [str]:
         return ['=']
+    
+
+class Return(Template):
+    def __init__(self, exp: Expression):
+        Template.__init__(self)
+        self.exp = exp
+        
+    def convert_to_text(self):
+        return 'It returns the following: ' + self.exp.convert_to_text()
+    
+    def convert_to_solidity(self):
+        return 'return ' + self.exp.convert_to_solidity() + ';'
+    
+    @staticmethod
+    def parse_template_from_text(text: [str]):
+        text = text[0]
+        exp_text = text[text.find('It returns the following: ') + len('It returns the following: '):]
+        return Return(Expression.parse_expression_from_text(exp_text))
+
+    @staticmethod
+    def get_description_vocab():
+        return ['it', 'returns', 'the', 'following']
+
+    @staticmethod
+    def get_solidity_vocab():
+        return ['return']
 
 
 class DefineFor(Template):
@@ -421,7 +449,9 @@ class DefineFunction(Template):
         options.remove('')
         options = None if options == [] else options
 
-        params_stms = text[0][text[0].find('with parameters: ') + len('with parameters: '):].replace(', ', ',').split(',')
+        params_stms = text[0][text[0].find('with parameters:') + len('with parameters:'):].replace(', ', ',').split(',')
+        while '' in params_stms:
+            params_stms.remove('')
         params = list(map(lambda stm: DefineVariable.parse_template_from_text([stm]), params_stms))
 
         component_statements = text[1:-1]
