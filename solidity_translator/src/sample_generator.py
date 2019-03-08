@@ -20,6 +20,8 @@ VAR_OPTIONS_SET = [
     'boolean',
 ]
 
+VAR_OPTIONS_SET_PLACEHOLDERS = ['VAR' + str(i) for i in range(16, 20)]
+
 FUNC_OPTIONS_SET = [
     'public',
     'private',
@@ -28,6 +30,7 @@ FUNC_OPTIONS_SET = [
     '(uint)'
 ]
 
+FUNC_OPTIONS_SET_PLACEHOLDERS = ['VAR' + str(i) for i in range(21, 25)]
 
 def __init__(self, max_recurrsive_depth):
     self.max_recurrsive_depth = max_recurrsive_depth
@@ -47,12 +50,12 @@ def generate_var_and_func_habenden_contract(potential_names: [str], used_names: 
     unused_names = get_unused_names(potential_names, used_names=used_names)
     name = get_random_name(unused_names)
     used_names.append(name)
-    possible_components = [
+    components = [
         generate_add_or_def_variable('contract', potential_names, used_names=used_names, placeholder=placeholder,
                                      var_num_only=var_num_only),
-        generate_demo_function('contract', potential_names, used_names, placeholder, var_num_only)]
-
-    components = [possible_components[random.randint(0, 1)]] * random.randint(1, 3)
+        generate_demo_function('contract', potential_names, used_names, placeholder, var_num_only),
+        generate_demo_function('contract', potential_names, used_names, placeholder, var_num_only),
+    ]
 
     return DefineContract(name, components)
 
@@ -106,9 +109,10 @@ def generate_add_or_def_variable(context, potential_names: [str], for_func_param
     if name in used_names:
         options = None
     else:
+        var_options_set = VAR_OPTIONS_SET if not placeholder else VAR_OPTIONS_SET_PLACEHOLDERS
         used_names.append(name)
-        option_idx = random.randint(0, len(VAR_OPTIONS_SET) - 1)
-        options = [VAR_OPTIONS_SET[option_idx]]
+        option_idx = random.randint(0, len(var_options_set) - 1)
+        options = [var_options_set[option_idx]]
 
     selector = random.randint(0, 1)
     
@@ -116,14 +120,15 @@ def generate_add_or_def_variable(context, potential_names: [str], for_func_param
     return DefineVariable(None if for_func_param else context, name, options, None if for_func_param else value)
 
 
-def generate_variable(context, potential_names: [str], for_func_param=False, used_names=None):
+def generate_variable(context, potential_names: [str], for_func_param=False, used_names=None, placeholder=False):
     name = get_random_name(potential_names)
     if name in used_names:
         options = None
     else:
         used_names.append(name)
-        option_idx = random.randint(0, len(VAR_OPTIONS_SET) - 1)
-        options = [VAR_OPTIONS_SET[option_idx]]
+        var_options_set = VAR_OPTIONS_SET if not placeholder else VAR_OPTIONS_SET_PLACEHOLDERS
+        option_idx = random.randint(0, len(var_options_set) - 1)
+        options = [var_options_set[option_idx]]
 
     value = generate_expression(potential_names, used_names=used_names)
     return DefineVariable(None if for_func_param else context, name, options, None if for_func_param else value)
@@ -134,9 +139,9 @@ def generate_return(potential_names: [str], used_names=None, placeholder=False, 
 
 def generate_demo_function(context: str, potential_names: [str], used_names=None, placeholder=False, var_num_only=False):
     name = get_random_name(potential_names)
-    selector = random.randint(0, 1)
-    options = ['public'] if selector == 0 else ['public view returns (uint)']
-    params = [generate_variable(None, potential_names, for_func_param=True, used_names=used_names) for _ in
+    options_set = FUNC_OPTIONS_SET if placeholder is False else FUNC_OPTIONS_SET_PLACEHOLDERS
+    options = [options_set[random.randint(0, len(options_set) - 1)] for _ in range(random.randint(1, 5))]
+    params = [generate_variable(None, potential_names, for_func_param=True, used_names=used_names, placeholder=placeholder) for _ in
               range(random.randint(0, MAX_NUM_ARGS))]
     components = get_func_components('function', potential_names, used_names=used_names, placeholder=placeholder,
                                      var_num_only=var_num_only, has_return=True)
@@ -145,8 +150,9 @@ def generate_demo_function(context: str, potential_names: [str], used_names=None
 
 def generate_function(context: str, potential_names: [str], used_names=None, placeholder=False, var_num_only=False, has_return=False):
     name = get_random_name(potential_names)
-    options = [FUNC_OPTIONS_SET[random.randint(0, len(FUNC_OPTIONS_SET) - 1)]]
-    params = [generate_variable(None, potential_names, for_func_param=True, used_names=used_names) for _ in range(random.randint(0, MAX_NUM_ARGS))]
+    options_set = FUNC_OPTIONS_SET if placeholder is False else FUNC_OPTIONS_SET_PLACEHOLDERS
+    options = [options_set[random.randint(0, len(options_set) - 1)] for _ in range(random.randint(1, 5))]
+    params = [generate_variable(None, potential_names, for_func_param=True, used_names=used_names, placeholder=placeholder) for _ in range(random.randint(0, MAX_NUM_ARGS))]
     components = get_func_components('function', potential_names, used_names=used_names, placeholder=placeholder, var_num_only=var_num_only, has_return=has_return)
     return DefineFunction(context, name, options, params, components)
 
@@ -259,7 +265,7 @@ def get_func_components(context, potential_names, used_names=None, placeholder=F
             if component_type == 0:
                 components.append(generate_enum(context, potential_names, used_names=used_names))
             elif component_type == 1:
-                components.append(generate_variable(context, potential_names, used_names=used_names))
+                components.append(generate_variable(context, potential_names, used_names=used_names, placeholder=placeholder))
             elif component_type == 2:
                 components.append(generate_if_else(potential_names, used_names=used_names))
             elif component_type == 3:

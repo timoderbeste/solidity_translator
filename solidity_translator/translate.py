@@ -33,19 +33,19 @@ def main():
         translate_by_rule(source_file_name, target_file_name)
     else:
         print('Preparing the data for the transformer...')
-        os.system('python prepare_descriptions_for_transformer.py %s test.en number_table.txt' % source_file_name)
+        os.system('python prepare_descriptions_for_transformer.py %s test.en number_table.txt variable_table.txt' % source_file_name)
         print('Copying the data to the proper location for the transformer...')
         os.system('cp ./data/test.en ./third_party_helper/attention-is-all-you-need-pytorch-master/data/multi30k/')
         print('Tokenizing the data...')
         os.system('bash tokenization.sh')
         print('Translating with the transformer...')
         helper_path = './third_party_helper/attention-is-all-you-need-pytorch-master'
-        print('python %s/translate.py -model %s/trained.chkpt -vocab %s/data/multi30k.atok.low.pt -src %s/data/multi30k/test.en.atok -no_cuda' % (helper_path, helper_path, helper_path, helper_path))
-        os.system('python %s/translate.py -model %s/trained.chkpt -vocab %s/data/multi30k.atok.low.pt -src %s/data/multi30k/test.en.atok -no_cuda' % (helper_path, helper_path, helper_path, helper_path))
+        # print('python %s/translate.py -model %s/trained.chkpt -vocab %s/data/multi30k.atok.low.pt -src %s/data/multi30k/test.en.atok' % (helper_path, helper_path, helper_path, helper_path))
+        os.system('python %s/translate.py -model %s/trained.chkpt -vocab %s/data/multi30k.atok.low.pt -src %s/data/multi30k/test.en.atok' % (helper_path, helper_path, helper_path, helper_path))
 
         os.system('mv ./pred.txt ./data/pred.txt')
         print('Reformatting the output from transformer...')
-        os.system('python reformat_transformer_output.py pred.txt number_table.txt %s' % target_file_name)
+        os.system('python reformat_transformer_output.py pred.txt number_table.txt variable_table.txt %s' % target_file_name)
         print('Done')
 
 

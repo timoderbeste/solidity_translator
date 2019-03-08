@@ -60,14 +60,23 @@ def read_items_from_file(file_name: str, path_name: str = '../data/') -> [[str]]
             item = []
     return items
 
-def write_number_tables_to_file(number_tables: [dict], file_name: str, path_name: str = './data/'):
-    file = open(path_name + file_name, 'w')
+def write_tables_to_file(number_tables: [dict], number_table_file_name: str, variable_tables: [dict], variable_table_file_name, path_name: str = './data/'):
+    file = open(path_name + number_table_file_name, 'w')
     for number_table in number_tables:
         for k in number_table:
             v = number_table[k]
             file.write('%s,%d\n' % (k, v))
         file.write('*******************************************\n')
     
+    file.close()
+
+    file = open(path_name + variable_table_file_name, 'w')
+    for variable_table in variable_tables:
+        for k in variable_table:
+            v = variable_table[k]
+            file.write('%s,%s\n' % (k, v))
+        file.write('*******************************************\n')
+
     file.close()
     
 def write_extracted_contracts_descriptions_to_file(extracted_contracts_descriptions: [str], file_name: str, path_name: str = './data/'):
@@ -89,11 +98,14 @@ def read_lines_from_file(file_name: str, path_name: str='./data/') -> [str]:
     file.close()
     return lines
 
-def load_number_tables_from_file(file_name: str, path_name: str='./data/') -> [dict]:
+def load_tables_from_file(number_tabel_file_name: str, variable_tabel_file_name, path_name: str= './data/') -> [dict]:
     number_tables = []
     number_table = {}
 
-    file = open(path_name + file_name, 'r')
+    variable_tabels = []
+    variable_tabel = {}
+
+    file = open(path_name + number_tabel_file_name, 'r')
     for line in file:
         if line != '*******************************************\n':
             k, v = line.split(',')
@@ -103,4 +115,17 @@ def load_number_tables_from_file(file_name: str, path_name: str='./data/') -> [d
             number_tables.append(number_table)
             number_table = {}
 
-    return number_tables
+    file.close()
+
+    file = open(path_name + variable_tabel_file_name, 'r')
+    for line in file:
+        if line != '*******************************************\n':
+            k, v = line.split(',')
+            variable_tabel[k] = v.strip('\n')
+        else:
+            variable_tabels.append(variable_tabel)
+            variable_tabel = {}
+
+    file.close()
+
+    return number_tables, variable_tabels
