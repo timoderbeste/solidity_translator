@@ -1,5 +1,6 @@
 from functools import reduce
 
+
 def is_number(text):
     text = text[1:-1]
     try:
@@ -170,8 +171,3 @@ def beautify_contract_codes(contract_code: str) -> str:
 
         contract_code_lines[i] = contract_code_lines[i] + '\n'
     return reduce(lambda s1, s2: s1 + s2, contract_code_lines)
-
-
-
-
-

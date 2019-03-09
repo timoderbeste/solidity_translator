@@ -5,7 +5,7 @@ from src.utils.sample_loader_saver import write_items_to_file
 from src.utils.general_utils import beautify_contract_codes
 
 POTENTIAL_NAMES = list('a b c d e f g h i j k l m n o p'.split())
-POTENTIAL_NAMES_PLACEHOLDERS = ['VAR' + str(i) for i in range(1, 15)]
+POTENTIAL_NAMES_PLACEHOLDERS = ['VAR' + str(i) for i in range(1,7)]
 MAX_LINE_LEN = 300
 PRINT_EVERY = 1000
 
@@ -55,6 +55,12 @@ def generate_samples(n_samples: int = 10, sample_names=None):
                 elif sample_name == 'contract_with_func_and_var_exp':
                     used_names = []
                     samples.append(generate_var_and_func_habenden_contract(POTENTIAL_NAMES, used_names, var_num_only=True, placeholder=False))
+                elif sample_name == 'demo_func1_with_placeholder':
+                    used_names = []
+                    samples.append(generate_demo_function1(None, POTENTIAL_NAMES, used_names, placeholder=True, var_num_only=True))
+                elif sample_name == 'demo_func2_with_placeholder':
+                    used_names = []
+                    samples.append(generate_demo_function2(None, POTENTIAL_NAMES, used_names, placeholder=True, var_num_only=True))
 
                 last_sample = samples[len(samples) - 1]
                 last_sample_lines = last_sample.convert_to_text().split('\n')
@@ -79,7 +85,7 @@ def main():
     allowed_names = ['contract', 'require', 'emit', 'enum', 'variable', 'add', 'multiply', 'divide',
                      'add_exp_with_placeholder', 'contract_with_add_exp_with_placeholder',
                      'contract_with_func_and_var_exp_with_placeholder',
-                     'contract_with_func_and_var_exp',
+                     'contract_with_func_and_var_exp', 'demo_func1_with_placeholder', 'demo_func2_with_placeholder',
                      'all']
 
     if len(sys.argv) < 6:

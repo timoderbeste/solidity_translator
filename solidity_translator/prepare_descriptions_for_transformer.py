@@ -9,11 +9,29 @@ from src.language_rules.templates import Template
 def extract_numbers_and_vars_from_contract_description(contract_description: [str]) -> (str, dict, dict):
     reserved_vocab = Expression.get_description_vocab() + Template.get_description_vocab()
     reserved_vocab += '( ) [ ] { } , . \\n :'.split(' ')
+    reserved_vocab += [
+        'uint',
+        'int',
+        'double',
+        'float',
+        'address',
+        'bytes32',
+        'boolean',
+    ]
+    reserved_vocab += [
+        'public',
+        'private',
+        'view',
+        'returns',
+        '(uint)'
+    ]
 
     # Combine all strings into one
     contract_description = reduce(lambda s1, s2: s1 + ' \\n ' + s2, contract_description) + ' \\n'
     number_table = {}
+    n2k = {}
     variable_table = {}
+    v2k = {}
     ncnt = 1
     vcnt = 1
     
@@ -23,14 +41,20 @@ def extract_numbers_and_vars_from_contract_description(contract_description: [st
     for i in range(len(extracted_contract_description)):
         try:
             num = int(extracted_contract_description[i])
-            number_table['NUM%d' % ncnt] = num
-            extracted_contract_description[i] = 'NUM%d' % ncnt
-            ncnt += 1
+            if num not in n2k:
+                n2k[num] = 'NUM%d' % ncnt
+                number_table['NUM%d' % ncnt] = num
+                ncnt += 1
+
+            extracted_contract_description[i] = n2k[num]
+
         except ValueError:
             if extracted_contract_description[i].lower() not in reserved_vocab:
-                variable_table['VAR%d' % vcnt] = extracted_contract_description[i]
-                extracted_contract_description[i] = 'VAR%d' % vcnt
-                vcnt += 1
+                if extracted_contract_description[i] not in v2k:
+                    v2k[extracted_contract_description[i]] = 'VAR%d' % vcnt
+                    variable_table['VAR%d' % vcnt] = extracted_contract_description[i]
+                    vcnt += 1
+                extracted_contract_description[i] = v2k[extracted_contract_description[i]]
 
     extracted_contract_description = ' '.join(extracted_contract_description).replace('[ ', '[').replace(' ]', ']')
     

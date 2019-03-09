@@ -219,6 +219,8 @@ def main():
     parser.add_argument('-no_cuda', action='store_true')
     parser.add_argument('-label_smoothing', action='store_true')
 
+    parser.add_argument('-model', help='path to .pt file')
+
     opt = parser.parse_args()
     opt.cuda = not opt.no_cuda
     opt.d_word_vec = opt.d_model
@@ -240,20 +242,45 @@ def main():
     print(opt)
 
     device = torch.device('cuda' if opt.cuda else 'cpu')
-    transformer = Transformer(
-        opt.src_vocab_size,
-        opt.tgt_vocab_size,
-        opt.max_token_seq_len,
-        tgt_emb_prj_weight_sharing=opt.proj_share_weight,
-        emb_src_tgt_weight_sharing=opt.embs_share_weight,
-        d_k=opt.d_k,
-        d_v=opt.d_v,
-        d_model=opt.d_model,
-        d_word_vec=opt.d_word_vec,
-        d_inner=opt.d_inner_hid,
-        n_layers=opt.n_layers,
-        n_head=opt.n_head,
-        dropout=opt.dropout).to(device)
+
+    if opt.model:
+        checkpoint = torch.load(opt.model, map_location=lambda storage, loc: storage)
+        model_opt = checkpoint['settings']
+
+        transformer = Transformer(
+            model_opt.src_vocab_size,
+            model_opt.tgt_vocab_size,
+            model_opt.max_token_seq_len,
+            tgt_emb_prj_weight_sharing=model_opt.proj_share_weight,
+            emb_src_tgt_weight_sharing=model_opt.embs_share_weight,
+            d_k=model_opt.d_k,
+            d_v=model_opt.d_v,
+            d_model=model_opt.d_model,
+            d_word_vec=model_opt.d_word_vec,
+            d_inner=model_opt.d_inner_hid,
+            n_layers=model_opt.n_layers,
+            n_head=model_opt.n_head,
+            dropout=model_opt.dropout).to(device)
+
+        transformer.load_state_dict(checkpoint['model'])
+        print('Previous model to continue training loaded')
+    else:
+        print('No previous model to continue training')
+        transformer = Transformer(
+            opt.src_vocab_size,
+            opt.tgt_vocab_size,
+            opt.max_token_seq_len,
+            tgt_emb_prj_weight_sharing=opt.proj_share_weight,
+            emb_src_tgt_weight_sharing=opt.embs_share_weight,
+            d_k=opt.d_k,
+            d_v=opt.d_v,
+            d_model=opt.d_model,
+            d_word_vec=opt.d_word_vec,
+            d_inner=opt.d_inner_hid,
+            n_layers=opt.n_layers,
+            n_head=opt.n_head,
+            dropout=opt.dropout).to(device)
+
 
     optimizer = ScheduledOptim(
         optim.Adam(

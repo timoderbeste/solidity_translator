@@ -20,7 +20,7 @@ VAR_OPTIONS_SET = [
     'boolean',
 ]
 
-VAR_OPTIONS_SET_PLACEHOLDERS = ['VAR' + str(i) for i in range(16, 20)]
+VAR_OPTIONS_SET_PLACEHOLDERS = ['VAR' + str(i) for i in range(1, 15)]
 
 FUNC_OPTIONS_SET = [
     'public',
@@ -30,7 +30,7 @@ FUNC_OPTIONS_SET = [
     '(uint)'
 ]
 
-FUNC_OPTIONS_SET_PLACEHOLDERS = ['VAR' + str(i) for i in range(21, 25)]
+FUNC_OPTIONS_SET_PLACEHOLDERS = ['VAR' + str(i) for i in range(1, 15)]
 
 def __init__(self, max_recurrsive_depth):
     self.max_recurrsive_depth = max_recurrsive_depth
@@ -50,11 +50,13 @@ def generate_var_and_func_habenden_contract(potential_names: [str], used_names: 
     unused_names = get_unused_names(potential_names, used_names=used_names)
     name = get_random_name(unused_names)
     used_names.append(name)
+    unused_names = get_unused_names(unused_names, used_names=used_names)
+    var_name = get_random_name(unused_names)
+    used_names.append(var_name)
     components = [
-        generate_add_or_def_variable('contract', potential_names, used_names=used_names, placeholder=placeholder,
-                                     var_num_only=var_num_only),
-        generate_demo_function('contract', potential_names, used_names, placeholder, var_num_only),
-        generate_demo_function('contract', potential_names, used_names, placeholder, var_num_only),
+        DefineVariable('contract', var_name, ['uint'], None),
+        generate_demo_function1('contract', potential_names, used_names, placeholder, var_num_only),
+        generate_demo_function2('contract', potential_names, used_names, placeholder, var_num_only),
     ]
 
     return DefineContract(name, components)
@@ -133,18 +135,34 @@ def generate_variable(context, potential_names: [str], for_func_param=False, use
     value = generate_expression(potential_names, used_names=used_names)
     return DefineVariable(None if for_func_param else context, name, options, None if for_func_param else value)
 
-def generate_return(potential_names: [str], used_names=None, placeholder=False, var_name_only=False):
-    exp = generate_expression(potential_names, False, used_names, placeholder, var_name_only)
+def generate_return(potential_names: [str], used_names=None, placeholder=False, var_num_only=False):
+    exp = generate_expression(potential_names, False, used_names, placeholder, var_num_only)
     return Return(exp)
 
-def generate_demo_function(context: str, potential_names: [str], used_names=None, placeholder=False, var_num_only=False):
-    name = get_random_name(potential_names)
-    options_set = FUNC_OPTIONS_SET if placeholder is False else FUNC_OPTIONS_SET_PLACEHOLDERS
-    options = [options_set[random.randint(0, len(options_set) - 1)] for _ in range(random.randint(1, 5))]
-    params = [generate_variable(None, potential_names, for_func_param=True, used_names=used_names, placeholder=placeholder) for _ in
-              range(random.randint(0, MAX_NUM_ARGS))]
-    components = get_func_components('function', potential_names, used_names=used_names, placeholder=placeholder,
-                                     var_num_only=var_num_only, has_return=True)
+def generate_demo_function1(context: str, potential_names: [str], used_names: [str]=None, placeholder=False, var_num_only=False):
+    unused_names = get_unused_names(potential_names, used_names)
+    name = get_random_name(unused_names)
+    used_names.append(name)
+    options = ['public']
+    param = generate_variable(None, potential_names, for_func_param=True, used_names=used_names, placeholder=placeholder)
+    params = [param]
+    unused_names = get_unused_names(unused_names, used_names)
+    var1_name = get_random_name(unused_names)
+    used_names.append(var1_name)
+    components = [
+        DefineVariable(context, var1_name, None, Variable(param.name))
+    ]
+    return DefineFunction(context, name, options, params, components)
+
+def generate_demo_function2(context: str, potential_names: [str], used_names=None, placeholder=False, var_num_only=False):
+    unused_names = get_unused_names(potential_names, used_names)
+    name = get_random_name(unused_names)
+    options = ['public', 'view', 'returns', '(uint)']
+    params = []
+    components = [
+        Return(Variable(get_random_name(used_names)))
+    ]
+    used_names.append(name)
     return DefineFunction(context, name, options, params, components)
 
 

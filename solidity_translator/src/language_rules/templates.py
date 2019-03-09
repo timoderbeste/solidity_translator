@@ -1,4 +1,6 @@
 from src.language_rules.expressions import *
+from src.utils.general_utils import extract_next_template_for_parsing
+
 
 class Template:
     def __init__(self):
@@ -313,7 +315,6 @@ class DefineFor(Template):
     def get_solidity_vocab() -> [str]:
         return ['for']
 
-    
 
 class DefineIfElse(Template):
     def __init__(self, bool_cond: BooleanOperation, true_stms: [Template], false_stms: [Template]):
